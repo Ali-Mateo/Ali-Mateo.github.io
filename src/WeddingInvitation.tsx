@@ -357,6 +357,5 @@ const TimeBox: React.FC<{ label: string; value: number }> = ({
     <small>{label}</small>
   </div>
 );
-//deploy prueba
 
 export default WeddingInvitation;
