@@ -79,7 +79,7 @@ const PhotoPanel: React.FC<{
     "../public/IMG-20250928-WA0015.jpg",
     "../public/IMG-20250928-WA0016.jpg",
     "../public/IMG-20250928-WA0021.jpg",
-    "../public/IMG-20250928-WA0015.jpg",
+    "../public/IMG-20250928-WA0017.jpg",
     "../public/IMG-20250928-WA0019.jpg",
     "../public/IMG-20250928-WA0018.jpg",
     "../public/IMG-20250928-WA0020.jpg",
