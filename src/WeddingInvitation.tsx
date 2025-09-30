@@ -151,7 +151,7 @@ const WeddingInvitation: React.FC = () => {
         <p className="script-subtle">Una nueva etapa que empieza con amor…</p>
         <h1 className="title-art">Mateo Ordóñez</h1>
         <div className="ampersand">&</div>
-        <h1 className="title-art">Alisson Torres</h1>
+        <h1 className="title-art">Holi Torres</h1>
         <p className="date-line">
           Sábado <strong>7 de febrero de 2026</strong> · <strong>12:00</strong>{" "}
           · Quinta Los Corteza
