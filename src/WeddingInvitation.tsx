@@ -208,6 +208,17 @@ const WeddingInvitation: React.FC = () => {
   const t = useCountdown(INVITE_DATE);
   const ref = useReveal();
   const navHidden = useHideOnScroll();
+  // Hace que la imagen "invitacion" sea el patrón global de fondo
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("--invite-tile", `url(${invitacion})`);
+    // Ajusta el tamaño del mosaico a tu gusto: 160–280px suelen verse bien
+    root.style.setProperty("--invite-tile-size", "220px");
+    return () => {
+      root.style.removeProperty("--invite-tile");
+      root.style.removeProperty("--invite-tile-size");
+    };
+  }, []);
 
   // #pases (tipado para evitar "possibly null")
   const [code, setCode] = useState("");
@@ -234,10 +245,7 @@ const WeddingInvitation: React.FC = () => {
   };
 
   return (
-    <div
-      className={styles.invRoot}
-      ref={ref as any}
-    >
+    <div className={styles.invRoot} ref={ref as any}>
       {/* NAV */}
       <nav
         className={`${styles.stickyNav} ${navHidden ? styles.navHidden : ""}`}
@@ -531,7 +539,7 @@ const WeddingInvitation: React.FC = () => {
         id="cuenta"
         className={`${styles.card} ${styles.paper} ${styles.reveal}`}
         aria-label="Detalles de regalo"
-        style={{ ["--paper-texture" as any]: `url(${papelTexture})` }}
+        style={{ ["--paper-texture" as any]: `url(${invitacion})` }}
       >
         <h2 className={styles.sectionTitle}>Detalles de regalo</h2>
         <p className={styles.muted}>

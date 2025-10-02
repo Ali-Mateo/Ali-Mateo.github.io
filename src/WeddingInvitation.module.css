@@ -37,55 +37,36 @@
 /* -------------------------
    Global base
 ------------------------- */
-:global(:root) {
-  /* La variable apunta directamente al asset dentro del CSS Module */
-  --papel-textura: url("./photos/papel.png");
-
-  /* evita heurísticas de dark mode en UI nativa (scrollbars, etc.) */
-  color-scheme: light;
+:global(html) {
+  font-size: clamp(0.95rem, 0.85rem + 0.5vw, 1.08rem);
 }
-
-/* Fondo global: papel en repeat + velos MUY claros (sin oscurecer) */
 :global(html),
 :global(body) {
+  width: 100%;
+  max-width: 100dvw;
   margin: 0;
-  color: var(--ink);
-  font-family: var(--font-serif-aux);
-  background-color: #fff; /* fallback anti-modo oscuro */
-
-  /* 4 capas: 2 radiales suaves + 1 linear suave + PAPEL en repeat */
-  background-image: radial-gradient(
-      75dvw 37.5dvw at 10% -10%,
-      rgba(255, 255, 255, 0.85) 0,
-      rgba(255, 255, 255, 0) 60%
-    ),
-    radial-gradient(
-      75dvw 37.5dvw at 90% 110%,
-      rgba(255, 255, 255, 0.85) 0,
-      rgba(255, 255, 255, 0) 60%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.92) 0%,
-      rgba(247, 241, 242, 0.92) 100%
-    ),
-    var(--papel-textura);
-
-  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
-  background-size: 100% 100%, 100% 100%, cover, 420px; /* ajusta 420px al grano que quieras */
-  background-position: center, center, center, 0 0;
-
-  /* evita bugs/oscurecidos en iOS con backgrounds fijos */
-  background-attachment: scroll, scroll, scroll, scroll;
-
-  /* sin multiply para que NO se oscurezca */
-  background-blend-mode: normal, normal, normal, normal;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
-
 :global(*),
 :global(*::before),
 :global(*::after) {
   box-sizing: inherit;
+}
+:global(body) {
+  color: var(--ink);
+  font-family: var(--font-serif-aux);
+  background: radial-gradient(75dvw 37.5dvw at 10% -10%, #fff 0, #fff0 60%),
+    radial-gradient(75dvw 37.5dvw at 90% 110%, #fff 0, #fff0 60%),
+    linear-gradient(180deg, #fff 0%, #f7f1f2 100%);
+}
+:global(img),
+:global(video),
+:global(canvas),
+:global(svg) {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* -------------------------
@@ -139,20 +120,26 @@
   margin-left: calc(50% - 50dvw);
   margin-right: calc(50% - 50dvw);
 }
-.inviteStack {
-  min-height: calc(
-    100dvh - var(--count-h)
-  ); /* header+invite ocupan viewport junto al countdown */
+/* Invitación: papel repetido a pantalla completa + PNG centrada */
+.inviteStack{
+  /* ocupa la pantalla menos la altura del countdown */
+  min-height: calc(80dvh - var(--count-h));
   display: grid;
   place-items: center;
   padding: 0;
-  /* solo un velo transparente para que se vea el papel global del <body> */
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.86) 0%,
-    rgba(255, 255, 255, 0.82) 40%,
-    rgba(249, 232, 238, 0.72) 100%
-  );
+
+  /* papel repetido + velo suave en blanco/palo rosa */
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.92) 0%,
+      rgba(255,255,255,0.86) 40%,
+      var(--blush-2) 100%
+    ),
+    url("./photos/papel.png");
+  background-repeat: no-repeat, repeat;
+  background-size: cover, 420px;     /* escala del papel (ajústala a tu gusto) */
+  background-position: center, 0 0;
 }
 
 .paperImg {
@@ -164,37 +151,25 @@
   filter: saturate(0.95) contrast(1.02);
   opacity: 0.96;
 }
-/* PNG con sombra de silueta */
 .inviteImgShadow {
-  width: min(92vw, 1100px);
-  max-height: calc(100dvh - var(--count-h) - 4vh);
+  grid-area: 1/1;
+  width: min(92vw, 1000px);
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 18px 32px rgba(183, 110, 121, 0.34))
-    drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12));
+  /* sombra de silueta (usa la transparencia del PNG) */
+  filter: drop-shadow(0 28px 40px rgba(0, 0, 0, 0.18))
+    drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
 }
 
 /* -------------------------
    Tira del contador (blanco ↔ palo rosa)
 ------------------------- */
-/* Tira del countdown: comparte el papel y completa hasta 100dvh */
 .countStrip {
-  min-height: var(--count-h);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  /* velo suave; el papel ya viene del body */
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(249, 232, 238, 0.9) 100%
-  );
+  margin-block: 0;
+  background: linear-gradient(180deg, #ffffff 0%, var(--blush-2) 100%);
   padding: 1.1rem clamp(1rem, 3vw, 2rem);
   text-align: center;
-  margin: 0;
 }
-
 .countdown {
   display: grid;
   grid-template-columns: repeat(4, minmax(4.2rem, 1fr));
