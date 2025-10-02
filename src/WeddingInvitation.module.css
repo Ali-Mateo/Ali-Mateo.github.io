@@ -58,8 +58,12 @@
   font-family: var(--font-serif-aux);
   background: radial-gradient(75dvw 37.5dvw at 10% -10%, #fff 0, #fff0 60%),
     radial-gradient(75dvw 37.5dvw at 90% 110%, #fff 0, #fff0 60%),
-    linear-gradient(180deg, #fff 0%, #f7f1f2 100%);
+    linear-gradient(180deg, #fff 0%, #f7f1f2 100%), var(--paper-tex); /* 👈 textura de papel */
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+  background-size: auto, auto, auto, var(--paper-size);
+  background-position: center top, center bottom, center, 0 0;
 }
+
 :global(img),
 :global(video),
 :global(canvas),
@@ -67,6 +71,23 @@
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+.paper {
+  background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(255, 255, 255, 0.86) 40%,
+      var(--blush-2) 100%
+    ),
+    red;
+  background-repeat: no-repeat, repeat;
+  background-size: cover, var(--paper-size);
+  background-position: center, 0 0;
+  border: 1px solid color-mix(in srgb, var(--gold) 18%, #0000);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 0.9rem;
+  padding: clamp(1rem, 2.5vw, 1.4rem);
 }
 
 /* -------------------------
@@ -121,30 +142,20 @@
   margin-right: calc(50% - 50dvw);
 }
 /* Invitación: papel repetido a pantalla completa + PNG centrada */
-.inviteStack{
-  /* ocupa la pantalla menos la altura del countdown */
+.inviteStack {
   min-height: calc(80dvh - var(--count-h));
   display: grid;
   place-items: center;
   padding: 0;
 
-  /* papel repetido + velo suave en blanco/palo rosa */
-  background-image:
-    linear-gradient(
-      180deg,
-      rgba(255,255,255,0.92) 0%,
-      rgba(255,255,255,0.86) 40%,
-      var(--blush-2) 100%
-    ),
-    url("./photos/papel.png");
-  background-repeat: no-repeat, repeat;
-  background-size: cover, 420px;     /* escala del papel (ajústala a tu gusto) */
-  background-position: center, 0 0;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 .paperImg {
   grid-area: 1/1;
-  width: min(96vw, 1100px);
+  width: min(80vw, 800px);
   height: auto;
   object-fit: contain;
   /* realce sutil del papel */
@@ -153,12 +164,22 @@
 }
 .inviteImgShadow {
   grid-area: 1/1;
-  width: min(92vw, 1000px);
+  width: min(80vw, 1000px);
   height: auto;
   object-fit: contain;
-  /* sombra de silueta (usa la transparencia del PNG) */
-  filter: drop-shadow(0 28px 40px rgba(0, 0, 0, 0.18))
-    drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+  position: relative; /* 👈 Necesario para posicionar el ::after */
+  z-index: 1; /* que quede encima de la sombra */
+}
+
+.inviteImgShadow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3); /* color de la sombra */
+  filter: blur(20px); /* desenfoque gaussiano */
+  z-index: -1; /* detrás de la imagen */
+  transform: translateY(15px); /* desplazar sombra hacia abajo */
+  border-radius: 1rem; /* opcional: suaviza bordes */
 }
 
 /* -------------------------
@@ -590,4 +611,11 @@
   .reveal[data-anim="left"] {
     transform: translateY(0.75rem);
   }
+}
+.pageTile {
+  width: 100%;
+  min-height: 100dvh;
+  background-repeat: repeat; /* 👈 patrón repetido */
+  background-position: 0 0;
+  background-size: 420px; /* ajusta el tamaño del mosaico a gusto */
 }
