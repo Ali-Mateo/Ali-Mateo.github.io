@@ -619,3 +619,94 @@
   background-position: 0 0;
   background-size: 420px; /* ajusta el tamaño del mosaico a gusto */
 }
+
+/* =========================
+   Imagen sin bordes con parallax (ScrollImage)
+   ========================= */
+.scrollImgSection {
+  margin-top: 2.5rem;
+  width: 100dvw;
+  margin-left: calc(50% - 50dvw);
+  margin-right: calc(50% - 50dvw);
+  height: 100dvh; /* 👈 más scroll = más "recorrido" */
+  position: relative;
+}
+
+.scrollImgFigure {
+  margin: 0;
+  width: 100%;
+  height: 100dvh;
+  position: sticky;
+  top: 0;
+  overflow: hidden;
+}
+
+.scrollImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(var(--parScale, 1)) translateY(var(--parY, 0));
+  will-change: transform;
+  transition: transform 0.2s ease-out; /* 👈 suaviza en móvil */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollImg {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* (opcional) lista simple de padres si quieres un estilo específico */
+.parents {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem auto 0;
+  max-width: 40rem;
+  text-align: center;
+}
+.parents li {
+  margin: 0.35rem 0;
+  color: var(--ink);
+}
+.parents span {
+  color: var(--muted);
+  font-size: 0.95em;
+}
+
+.mapBtn {
+  margin-top: 2rem;
+}
+
+.accountBox {
+  flex: 1;
+  max-width: max-content;
+  font-family: var(--font-serif-aux);
+  font-size: 0.95rem;
+  line-height: 0.5;
+  /* align-items y gap no hacen nada aquí, puedes quitarlos si quieres */
+}
+
+.qrBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  border-radius: 0.8rem;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--rose-gold) 30%, #0000);
+}
+
+.qrImg {
+  max-width: 120px;
+  height: auto;
+  display: block;
+}
+
+.accountRow {
+  display: flex;
+  justify-content: space-between; /* 👈 separa texto a la izq y QR a la der */
+  align-items: flex-start;        /* 👈 alineados arriba */
+  flex-wrap: wrap;                /* 👈 en pantallas pequeñas se apilan */
+}
+

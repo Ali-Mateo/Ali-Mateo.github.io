@@ -11,6 +11,7 @@ import poniendo from "./photos/PoniendoElAnillo.jpg"; // VERTICAL
 import abrazoTierno from "./photos/AbrazoTierno.jpg"; // VERTICAL
 import papelTexture from "./photos/papel.png";
 import invitacion from "./photos/Invitacion1.png";
+import qrExample from "./photos/QRlol.png"; // ejemplo QR//
 
 /* =====================
    Datos de la boda
@@ -69,19 +70,18 @@ function useReveal() {
 
 function useHideOnScroll() {
   const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
+
   useEffect(() => {
-    let last = window.scrollY;
     const onScroll = () => {
       const y = window.scrollY;
-      const dy = y - last;
-      if (Math.abs(dy) > 6) {
-        setHidden(dy > 0 && y > 64);
-        last = y;
-      }
+      setHidden(y > lastY.current && y > 80); // ocultar si bajo rápido y no estoy arriba del todo
+      lastY.current = y;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
   return hidden;
 }
 
@@ -138,30 +138,6 @@ const Icon: React.FC<{ name: "welcome" | "ring" | "toast" | "dinner" }> = ({
   }
 };
 
-const PhotoPanel: React.FC<{
-  src: string;
-  title?: string;
-  subtitle?: string;
-  children?: React.ReactNode;
-}> = ({ src, title, subtitle, children }) => (
-  <section className={`${styles.photoPanel} ${styles.reveal}`}>
-    <picture className={styles.photoPicture} aria-hidden="true">
-      <img
-        className={styles.photoBgImg}
-        src={src}
-        alt={title || "Foto"}
-        loading="lazy"
-      />
-    </picture>
-    <div className={styles.photoOverlay} aria-hidden="true" />
-    <div className={styles.photoContent}>
-      {title && <h3 className={styles.photoTitle}>{title}</h3>}
-      {subtitle && <p className={styles.photoSub}>{subtitle}</p>}
-      {children}
-    </div>
-  </section>
-);
-
 /* Carrusel tipo cinta transbordadora (scroll continuo, sin saltos) */
 const Carousel: React.FC<{
   items: { src: string; alt: string; caption?: string }[];
@@ -201,6 +177,48 @@ const Carousel: React.FC<{
   );
 };
 
+/** Imagen a pantalla ancha, sin bordes, con parallax al hacer scroll */
+const ScrollImage: React.FC<{ src: string; alt?: string; ratio?: string }> = ({
+  src,
+  alt,
+  ratio = "21/9",
+}) => {
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const [progress,] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const total = rect.height - vh;
+      const scrolled = Math.min(Math.max((0 - rect.top) / total, 0), 1);
+      const scale = 1 + scrolled * 0.2;
+      sectionRef.current
+        .querySelector("img")
+        ?.style.setProperty("transform", `scale(${scale})`);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // escala de 1 a 1.2 según progreso
+  const scale = 1 + progress * 0.2;
+
+  return (
+    <section className={styles.scrollImgSection} ref={sectionRef}>
+      <figure className={styles.scrollImgFigure} style={{ aspectRatio: ratio }}>
+        <img
+          src={src}
+          alt={alt}
+          className={styles.scrollImg}
+          style={{ transform: `scale(${scale})` }}
+        />
+      </figure>
+    </section>
+  );
+};
+
 /* =====================
    Componente principal
 ===================== */
@@ -208,12 +226,12 @@ const WeddingInvitation: React.FC = () => {
   const t = useCountdown(INVITE_DATE);
   const ref = useReveal();
   const navHidden = useHideOnScroll();
-  // Hace que la imagen "invitacion" sea el patrón global de fondo
+
   // Papel texturizado como patrón global
   useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty("--paper-tex", `url(${papelTexture})`);
-    root.style.setProperty("--paper-size", "420px"); // ajusta 220–480px a gusto
+    root.style.setProperty("--paper-size", "420px");
     return () => {
       root.style.removeProperty("--paper-tex");
       root.style.removeProperty("--paper-size");
@@ -247,7 +265,7 @@ const WeddingInvitation: React.FC = () => {
   return (
     <div
       className={styles.pageTile}
-      style={{ backgroundImage: `url(${papelTexture})` }} // 👈 patrón usando la imagen
+      style={{ backgroundImage: `url(${papelTexture})` }}
     >
       <div className={styles.invRoot} ref={ref as any}>
         {/* NAV */}
@@ -256,7 +274,8 @@ const WeddingInvitation: React.FC = () => {
         >
           <a href="#invitacion">Inicio</a>
           <a href="#invitacion">Invitación</a>
-          <a href="#pedida">Pedida</a>
+          <a href="#pedida">Carrusel</a>
+          <a href="#padres">Padres</a>
           <a href="#itinerario">Itinerario</a>
           <a href="#codigo">#pases</a>
           <a href="#rsvp">Confirmar</a>
@@ -265,7 +284,7 @@ const WeddingInvitation: React.FC = () => {
           <a href="#mesas">Mesas</a>
         </nav>
 
-        {/* INVITACIÓN: papel debajo + PNG con sombra de silueta (full-bleed) */}
+        {/* INVITACIÓN (antes de la reorg solicitada) */}
         <section
           id="invitacion"
           className={`${styles.fullBleed} ${styles.inviteStack} ${styles.reveal}`}
@@ -302,11 +321,13 @@ const WeddingInvitation: React.FC = () => {
           </p>
         </section>
 
-        {/* Pedida de mano: carrusel cinta transbordadora */}
+        {/* ====== REORGANIZACIÓN A PARTIR DEL CARRUSEL ====== */}
+
+        {/* 1. Carrusel */}
         <section
           className={`${styles.card} ${styles.reveal}`}
           id="pedida"
-          aria-label="Pedida de mano"
+          aria-label="La pedida de mano"
         >
           <h2 className={styles.sectionTitle}>La pedida de mano</h2>
           <Carousel
@@ -341,268 +362,230 @@ const WeddingInvitation: React.FC = () => {
           />
         </section>
 
-        {/* Bloques editoriales */}
-        <div className={styles.photosGrid}>
-          <PhotoPanel
-            src={inviteImg}
-            title="Nuestra historia"
-            subtitle="Un día a la vez, hasta siempre."
-          />
-          <PhotoPanel
-            src={mostrandoAnillo}
-            title="La ceremonia"
-            subtitle="Emoción & promesas"
-          />
-          <PhotoPanel
-            src={abrazoTierno}
-            title="La celebración"
-            subtitle="Risas, abrazos y baile"
-          />
-        </div>
-
-        {/* Padres + Itinerario */}
-        <section className={styles.grid2}>
-          <article
-            id="padres"
-            className={`${styles.card} ${styles.reveal}`}
-            aria-label="Padres de los novios"
-          >
-            <h2 className={styles.sectionTitle}>
-              Con la bendición de nuestros padres
-            </h2>
-            <ul className={styles.parents}>
-              <li>
-                <strong>Vicente Ordóñez</strong> &{" "}
-                <strong>Laura Córdova</strong> <span>(padres del novio)</span>
-              </li>
-              <li>
-                <strong>Maria Judith Aguirre Mera</strong> &{" "}
-                <strong>Jose Fredy Torres Cruz</strong>{" "}
-                <span>(padres de la novia)</span>
-              </li>
-            </ul>
-          </article>
-
-          <article
-            id="itinerario"
-            className={`${styles.card} ${styles.reveal}`}
-            data-anim="left"
-            aria-label="Itinerario de la boda"
-          >
-            <h2 className={styles.sectionTitle}>Itinerario</h2>
-            <ul className={styles.timeline}>
-              <li
-                className={`${styles.timelineStep} ${styles.reveal}`}
-                data-anim="left"
-              >
-                <Icon name="welcome" /> <time>12:00</time> Recepción &
-                bienvenida
-              </li>
-              <li
-                className={`${styles.timelineStep} ${styles.reveal}`}
-                data-anim="left"
-              >
-                <Icon name="ring" /> <time>12:30</time> Ceremonia
-              </li>
-              <li
-                className={`${styles.timelineStep} ${styles.reveal}`}
-                data-anim="left"
-              >
-                <Icon name="toast" /> <time>13:30</time> Brindis & fotos
-              </li>
-              <li
-                className={`${styles.timelineStep} ${styles.reveal}`}
-                data-anim="left"
-              >
-                <Icon name="dinner" /> <time>14:00</time> Banquete & celebración
-              </li>
-            </ul>
-            <p className={styles.tinyHint}>*Horarios referenciales</p>
-          </article>
+        {/* 2. Con la bendición de nuestros padres... */}
+        <section
+          id="padres"
+          className={`${styles.card} ${styles.reveal}`}
+          aria-label="Padres de los novios"
+        >
+          <h2 className={styles.sectionTitle}>
+            Con la bendición de nuestros padres
+          </h2>
+          <ul className={styles.parents}>
+            <li>
+              <strong>Vicente Ordóñez</strong> & <strong>Laura Córdova</strong>{" "}
+              <span>(padres del novio)</span>
+            </li>
+            <li>
+              <strong>Maria Judith Aguirre Mera</strong> &{" "}
+              <strong>Jose Fredy Torres Cruz</strong>{" "}
+              <span>(padres de la novia)</span>
+            </li>
+          </ul>
         </section>
 
-        {/* #pases + RSVP */}
-        <section className={styles.grid2}>
-          <article
-            id="codigo"
-            className={`${styles.card} ${styles.reveal}`}
-            aria-label="Consulta de pases"
-          >
-            <h2 className={styles.sectionTitle}>
-              Tu código <span className={styles.hash}>#pases</span>
-            </h2>
-            <p className={styles.muted}>
-              Ingresa tu código para ver tus pases asignados.
-            </p>
-            <div className={styles.codeRow}>
+        {/* 3. Imagen sin bordes con efecto al hacer scroll */}
+        <ScrollImage
+          src={mostrandoAnillo}
+          alt="Detalle del anillo"
+          ratio="21/9"
+        />
+
+        {/* 4. Itinerario */}
+        <section
+          id="itinerario"
+          className={`${styles.card} ${styles.reveal}`}
+          data-anim="left"
+          aria-label="Itinerario de la boda"
+        >
+          <h2 className={styles.sectionTitle}>Itinerario</h2>
+          <ul className={styles.timeline}>
+            <li
+              className={`${styles.timelineStep} ${styles.reveal}`}
+              data-anim="left"
+            >
+              <Icon name="welcome" /> <time>12:00</time> Recepción & bienvenida
+            </li>
+            <li
+              className={`${styles.timelineStep} ${styles.reveal}`}
+              data-anim="left"
+            >
+              <Icon name="ring" /> <time>12:30</time> Ceremonia
+            </li>
+            <li
+              className={`${styles.timelineStep} ${styles.reveal}`}
+              data-anim="left"
+            >
+              <Icon name="toast" /> <time>13:30</time> Brindis & fotos
+            </li>
+            <li
+              className={`${styles.timelineStep} ${styles.reveal}`}
+              data-anim="left"
+            >
+              <Icon name="dinner" /> <time>14:00</time> Banquete & celebración
+            </li>
+          </ul>
+          <p className={styles.tinyHint}>*Horarios referenciales</p>
+        </section>
+
+        {/* 5. Imagen como la 3 */}
+        <ScrollImage src={heroImg} alt="Manos y anillo" ratio="21/9" />
+
+        {/* 6. #pases */}
+        <section
+          id="codigo"
+          className={`${styles.card} ${styles.reveal}`}
+          aria-label="Consulta de pases"
+        >
+          <h2 className={styles.sectionTitle}>
+            Tu código <span className={styles.hash}>#pases</span>
+          </h2>
+          <p className={styles.muted}>
+            Ingresa tu código para ver tus pases asignados.
+          </p>
+          <div className={styles.codeRow}>
+            <input
+              className={styles.input}
+              placeholder="Ej: AB123"
+              value={code}
+              inputMode="text"
+              aria-label="Código de invitado"
+              onChange={(e) => setCode(e.target.value)}
+            />
+            <button
+              className={`${styles.btn} ${styles.rg}`}
+              onClick={() => setCode(code.trim().toUpperCase())}
+            >
+              Buscar
+            </button>
+          </div>
+          <div className={styles.srOnly} aria-live="polite">
+            {guest
+              ? `${guest.nombre} tiene ${guest.pases} pase(s)`
+              : code
+              ? "Código no encontrado"
+              : ""}
+          </div>
+          {guest ? (
+            <div className={`${styles.codeResult} ${styles.ok}`}>
+              ¡Hola, <strong>{guest.nombre}</strong>! Tienes{" "}
+              <strong>{guest.pases}</strong> pase(s).
+            </div>
+          ) : code ? (
+            <div className={`${styles.codeResult} ${styles.bad}`}>
+              No encontramos ese código.
+            </div>
+          ) : null}
+          <p className={styles.tinyHint}>*Ejemplos: AB123, FAM001, VIP777.</p>
+        </section>
+
+        {/* 7. Imagen */}
+        <ScrollImage src={arrodillado} alt="El gran momento" ratio="21/9" />
+
+        {/* 8. Confirmar asistencia */}
+        <section
+          id="rsvp"
+          className={`${styles.card} ${styles.reveal}`}
+          aria-label="Confirmación de asistencia"
+        >
+          <h2 className={styles.sectionTitle}>Confirmar asistencia (RSVP)</h2>
+          <form className={styles.form} onSubmit={submitRSVP}>
+            <label>
+              Nombre completo
               <input
                 className={styles.input}
-                placeholder="Ej: AB123"
-                value={code}
-                inputMode="text"
-                aria-label="Código de invitado"
-                onChange={(e) => setCode(e.target.value)}
+                value={rsvpName}
+                onChange={(e) => setRsvpName(e.target.value)}
+                required
+                autoComplete="name"
               />
-              <button
-                className={`${styles.btn} ${styles.rg}`}
-                onClick={() => setCode(code.trim().toUpperCase())}
-              >
-                Buscar
-              </button>
-            </div>
-            <div className={styles.srOnly} aria-live="polite">
-              {guest
-                ? `${guest.nombre} tiene ${guest.pases} pase(s)`
-                : code
-                ? "Código no encontrado"
-                : ""}
-            </div>
-            {guest ? (
-              <div className={`${styles.codeResult} ${styles.ok}`}>
-                ¡Hola, <strong>{guest.nombre}</strong>! Tienes{" "}
-                <strong>{guest.pases}</strong> pase(s).
-              </div>
-            ) : code ? (
-              <div className={`${styles.codeResult} ${styles.bad}`}>
-                No encontramos ese código.
-              </div>
-            ) : null}
-            <p className={styles.tinyHint}>*Ejemplos: AB123, FAM001, VIP777.</p>
-          </article>
-
-          <article
-            id="rsvp"
-            className={`${styles.card} ${styles.reveal}`}
-            aria-label="Confirmación de asistencia"
-          >
-            <h2 className={styles.sectionTitle}>Confirmar asistencia (RSVP)</h2>
-            <form className={styles.form} onSubmit={submitRSVP}>
-              <label>
-                Nombre completo
-                <input
-                  className={styles.input}
-                  value={rsvpName}
-                  onChange={(e) => setRsvpName(e.target.value)}
-                  required
-                  autoComplete="name"
-                />
-              </label>
-              <label>
-                Nº de personas
-                <input
-                  className={styles.input}
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={rsvpCount}
-                  onChange={(e) =>
-                    setRsvpCount(parseInt(e.target.value || "1"))
-                  }
-                  required
-                />
-              </label>
-              <button className={`${styles.btn} ${styles.rg}`} type="submit">
-                Enviar aceptación
-              </button>
-              {rsvpMsg && (
-                <p className={styles.okMsg} aria-live="polite">
-                  {rsvpMsg}
-                </p>
-              )}
-            </form>
-          </article>
+            </label>
+            <label>
+              Nº de personas
+              <input
+                className={styles.input}
+                type="number"
+                min={1}
+                max={10}
+                value={rsvpCount}
+                onChange={(e) => setRsvpCount(parseInt(e.target.value || "1"))}
+                required
+              />
+            </label>
+            <button className={`${styles.btn} ${styles.rg}`} type="submit">
+              Enviar aceptación
+            </button>
+            {rsvpMsg && (
+              <p className={styles.okMsg} aria-live="polite">
+                {rsvpMsg}
+              </p>
+            )}
+          </form>
         </section>
 
-        {/* Galería */}
-        <section
-          id="galeria"
-          className={`${styles.card} ${styles.reveal}`}
-          aria-label="Galería de fotos"
-        >
-          <h2 className={styles.sectionTitle}>Galería</h2>
-          <div className={styles.galleryGrid}>
-            {[
-              juntosAbrazo,
-              mostrandoAnillo,
-              arrodillado,
-              poniendo,
-              abrazoTierno,
-              heroImg,
-            ].map((g, i) => (
-              <div className={styles.galleryCell} key={i}>
-                <img
-                  className={styles.galleryImg}
-                  src={g}
-                  alt={`Foto de la galería ${i + 1}`}
-                  loading="lazy"
-                />
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* 9. Imagen */}
+        <ScrollImage src={abrazoTierno} alt="Abrazo tierno" ratio="21/9" />
 
-        {/* Información bancaria */}
+        {/* 10. Detalles de regalo */}
+        {/* 10. Detalles de regalo */}
         <section
           id="cuenta"
           className={`${styles.card} ${styles.paper} ${styles.reveal}`}
           aria-label="Detalles de regalo"
-          style={{ ["--paper-texture" as any]: `url(${invitacion})` }}
         >
           <h2 className={styles.sectionTitle}>Detalles de regalo</h2>
           <p className={styles.muted}>
             “Tu compañía es lo más importante, pero si gustas apoyarnos en
-            nuestro nuevo comienzo, aquí están los detalles”.
+            nuestro nuevo comienzo, aquí están los detalles para tu
+            contribución”.
           </p>
+
           <div className={styles.accountRow}>
-            <code className={styles.account}>{account}</code>
-            <button
-              className={`${styles.btn} ${styles.ghost}`}
-              onClick={copyAccount}
-            >
-              {copied ? "¡Copiado!" : "Copiar"}
-            </button>
+            <div className={styles.accountBox}>
+              <p>
+                <strong>Banco:</strong> Banco Pichincha
+              </p>
+              <p>
+                <strong>Tipo de cuenta:</strong> Ahorros
+              </p>
+              <p>
+                <strong>Número de cuenta:</strong> 1234567890
+              </p>
+              <p>
+                <strong>Cédula:</strong> 0102030405
+              </p>
+              <p>
+                <strong>Correo:</strong> novios@example.com
+              </p>
+            </div>
+            <div className={styles.qrBox}>
+              <img
+                src={qrExample} // 👈 pon aquí tu QR real en /public o importado
+                alt="Código QR para transferencia"
+                className={styles.qrImg}
+              />
+            </div>
           </div>
-          <p className={styles.tinyHint}>*Cámbialo por tu banco/CLABE/IBAN.</p>
-        </section>
 
-        {/* Ubicación */}
-        <section
-          id="mapa"
-          className={`${styles.card} ${styles.reveal}`}
-          aria-label="Mapa de ubicación"
-        >
-          <h2 className={styles.sectionTitle}>Ubicación</h2>
-          <p className={styles.place}>{VENUE}</p>
-          <div className={styles.mapEmbed}>
-            <iframe
-              title="Mapa de la ubicación"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              src={`https://www.google.com/maps?q=${encodeURIComponent(
-                VENUE
-              )}&output=embed`}
-              allowFullScreen
-            />
-          </div>
-          <a
-            className={`${styles.btn} ${styles.rg}`}
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              VENUE
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            className={`${styles.btn} ${styles.ghost}`}
+            onClick={copyAccount}
           >
-            Abrir en Google Maps
-          </a>
+            {copied ? "¡Copiado!" : "Copiar cuenta"}
+          </button>
+
+          <p className={styles.tinyHint}>
+            *Puedes escanear el QR o copiar los datos para tu transferencia.
+          </p>
         </section>
 
-        {/* Plano de mesas */}
+        {/* 12. Ubica tu mesa */}
         <section
           id="mesas"
           className={`${styles.card} ${styles.reveal}`}
           aria-label="Plano de mesas"
         >
-          <h2 className={styles.sectionTitle}>Busca tu mesa</h2>
+          <h2 className={styles.sectionTitle}>Ubica tu mesa</h2>
           <p className={styles.muted}>
             Aquí va la imagen del plano (proporción 16/9 o 3/4, se recorta con
             cover).
@@ -616,6 +599,7 @@ const WeddingInvitation: React.FC = () => {
           </div>
         </section>
 
+        {/* 14. Footer */}
         <footer
           className={`${styles.footer} ${styles.reveal}`}
           aria-label="Cierre"
