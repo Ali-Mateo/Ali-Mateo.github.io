@@ -1,17 +1,35 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import "./WeddingInvitation.css";
+import styles from "./WeddingInvitation.module.css";
 
-type Guest = { nombre: string; pases: number };
+/* ==== Imports de imágenes desde src/photos ==== */
+import heroImg from "./photos/TomadosDeLaManoAnillo.jpg";
+import inviteImg from "./photos/SillasFoto1.jpg";                // HORIZONTAL
+import juntosAbrazo from "./photos/JuntosAbrazo.jpg";            // VERTICAL
+import mostrandoAnillo from "./photos/MostrandoAnillo.jpg";      // VERTICAL
+import arrodillado from "./photos/ArrodilladoDandoAnillo.jpg";   // VERTICAL
+import poniendo from "./photos/PoniendoElAnillo.jpg";            // VERTICAL
+import abrazoTierno from "./photos/AbrazoTierno.jpg";            // VERTICAL
+import papelTexture from "./photos/papel.png";
+import invitacion from "./photos/Invitacion.png";
 
+/* =====================
+   Datos de la boda
+===================== */
+const COUPLE = { groom: "Mateo Ordóñez", bride: "Alisson Torres" };
+const VENUE = "Quinta Los Corteza";
 const INVITE_DATE = "2026-02-07T12:00:00";
 
-// DEMO de #pases
+/* DEMO de #pases (reemplazar por API/Sheets real) */
+type Guest = { nombre: string; pases: number };
 const MOCK_CODES: Record<string, Guest> = {
   AB123: { nombre: "Invitado de Ejemplo", pases: 2 },
   FAM001: { nombre: "Familia Torres", pases: 4 },
   VIP777: { nombre: "Amigo Especial", pases: 1 },
 };
 
+/* =====================
+   Hooks
+===================== */
 function useCountdown(targetISO: string) {
   const target = useMemo(() => new Date(targetISO).getTime(), [targetISO]);
   const [now, setNow] = useState(() => Date.now());
@@ -33,12 +51,9 @@ function useReveal() {
   const ref = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const root = ref.current ?? document.body;
-    const els = Array.from(root.querySelectorAll<HTMLElement>(".reveal"));
+    const els = Array.from(root.querySelectorAll<HTMLElement>(`.${styles.reveal}`));
     const io = new IntersectionObserver(
-      (entries) =>
-        entries.forEach(
-          (e) => e.isIntersecting && e.target.classList.add("in-view")
-        ),
+      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add(styles.inView)),
       { threshold: 0.15 }
     );
     els.forEach((el) => io.observe(el));
@@ -47,79 +62,142 @@ function useReveal() {
   return ref;
 }
 
-// --- Reemplazo del componente PhotoPanel ---
+function useHideOnScroll() {
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const dy = y - last;
+      if (Math.abs(dy) > 6) {
+        setHidden(dy > 0 && y > 64);
+        last = y;
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return hidden;
+}
+
+/* =====================
+   UI Helpers
+===================== */
+const TimeBox: React.FC<{ label: string; value: number }> = ({ label, value }) => (
+  <div className={styles.timeBox} aria-label={`${label} restantes`}>
+    <span>{String(value).padStart(2, "0")}</span>
+    <small>{label}</small>
+  </div>
+);
+
+const Icon: React.FC<{ name: "welcome" | "ring" | "toast" | "dinner" }> = ({ name }) => {
+  const common = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", strokeWidth: 1.5 } as const;
+  switch (name) {
+    case "welcome":
+      return (
+        <svg {...common} aria-hidden="true" className={styles.rgStroke}>
+          <path d="M4 10h16M6 10V6h12v4m-3 4v6m-6-6v6" />
+        </svg>
+      );
+    case "ring":
+      return (
+        <svg {...common} aria-hidden="true" className={styles.rgStroke}>
+          <circle cx="12" cy="14" r="6" />
+          <path d="M10 5l2-2 2 2" />
+        </svg>
+      );
+    case "toast":
+      return (
+        <svg {...common} aria-hidden="true" className={styles.rgStroke}>
+          <path d="M7 8l5 2 5-2M12 10v8" />
+          <path d="M7 8v4a5 5 0 0010 0V8" />
+        </svg>
+      );
+    default:
+      return (
+        <svg {...common} aria-hidden="true" className={styles.rgStroke}>
+          <path d="M4 6h16M6 6v10a4 4 0 004 4h4a4 4 0 004-4V6" />
+        </svg>
+      );
+  }
+};
+
 const PhotoPanel: React.FC<{
   src: string;
   title?: string;
   subtitle?: string;
   children?: React.ReactNode;
 }> = ({ src, title, subtitle, children }) => (
-  <section className="photo-panel reveal">
-    <picture className="photo-picture">
-      {/* Cuando tengas variantes, descomenta y apunta a tus tamaños reales:
-      <source
-        srcSet={`${src.replace('.jpg','-750.jpg')} 750w, ${src.replace('.jpg','-1080.jpg')} 1080w, ${src.replace('.jpg','-1440.jpg')} 1440w`}
-        sizes="(max-width: 768px) 100vw, (max-width: 1168px) 50vw, 33vw"
-      />
-      */}
-      <img className="photo-bg-img" src={src} alt="" loading="lazy" />
+  <section className={`${styles.photoPanel} ${styles.reveal}`}>
+    <picture className={styles.photoPicture} aria-hidden="true">
+      <img className={styles.photoBgImg} src={src} alt={title || "Foto"} loading="lazy" />
     </picture>
-    <div className="photo-overlay" />
-    <div className="photo-content">
-      {title && <h3 className="photo-title">{title}</h3>}
-      {subtitle && <p className="photo-sub">{subtitle}</p>}
+    <div className={styles.photoOverlay} aria-hidden="true" />
+    <div className={styles.photoContent}>
+      {title && <h3 className={styles.photoTitle}>{title}</h3>}
+      {subtitle && <p className={styles.photoSub}>{subtitle}</p>}
       {children}
     </div>
   </section>
 );
 
-// --- Reemplazo del bloque de fotos ---
-<div className="photos-grid">
-  {[
-    "../public/IMG-20250928-WA0015.jpg",
-    "../public/IMG-20250928-WA0016.jpg",
-    "../public/IMG-20250928-WA0021.jpg",
-    "../public/IMG-20250928-WA0017.jpg",
-    "../public/IMG-20250928-WA0019.jpg",
-    "../public/IMG-20250928-WA0018.jpg",
-    "../public/IMG-20250928-WA0020.jpg",
-  ].map((p, i) => (
-    <PhotoPanel
-      key={p}
-      src={p}
-      title={
-        [
-          "Nuestra historia",
-          "La ceremonia",
-          "El anillo",
-          "Nuestro sí",
-          "El lugar",
-          "La pedida",
-          "Nos vemos pronto",
-        ][i]
-      }
-      subtitle={
-        [
-          "Un día a la vez, hasta siempre.",
-          "Emoción & promesas",
-          "Para toda la vida",
-          "Risas y abrazos",
-          "Quinta Los Corteza",
-          "Un momento para recordar",
-          "¡Te esperamos!",
-        ][i]
-      }
-    />
-  ))}
-</div>;
+/* Carrusel con autoplay sin "saltos" de página */
+const Carousel: React.FC<{ items: { src: string; alt: string; caption?: string }[] }> = ({ items }) => {
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [paused, setPaused] = useState(false);
 
+  const next = () => {
+    const el = trackRef.current;
+    if (!el) return;
+
+    // Avanza exactamente un "slide" (85% del ancho del track, como en el CSS)
+    const step = el.clientWidth * 0.85;
+    const targetLeft = el.scrollLeft + step;
+
+    // Desplaza SOLO en eje X (no toca el scroll vertical del documento)
+    el.scrollTo({ left: targetLeft, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const id = window.setInterval(() => { if (!paused) next(); }, 3500);
+    return () => window.clearInterval(id);
+  }, [paused]);
+
+  return (
+    <div
+      className={`${styles.carousel} ${styles.reveal}`}
+      data-anim="left"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={() => setPaused(true)}
+      onTouchEnd={() => setPaused(false)}
+    >
+      <div className={styles.carTrack} ref={trackRef}>
+        {items.map((it, i) => (
+          <figure key={i} className={styles.carSlide} tabIndex={-1}>
+            <img src={it.src} alt={it.alt} loading="lazy" />
+            {it.caption && <figcaption className={styles.carCaption}>{it.caption}</figcaption>}
+          </figure>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+/* =====================
+   Componente principal
+===================== */
 const WeddingInvitation: React.FC = () => {
   const t = useCountdown(INVITE_DATE);
   const ref = useReveal();
+  const navHidden = useHideOnScroll();
 
+  // #pases
   const [code, setCode] = useState("");
   const guest = (code && MOCK_CODES[code.trim().toUpperCase()]) || null;
 
+  // RSVP (demo)
   const [rsvpName, setRsvpName] = useState("");
   const [rsvpCount, setRsvpCount] = useState(1);
   const [rsvpMsg, setRsvpMsg] = useState("");
@@ -128,6 +206,7 @@ const WeddingInvitation: React.FC = () => {
     setRsvpMsg("¡Gracias! Tu aceptación quedó registrada. (Demo)");
   };
 
+  // Cuenta bancaria (opcional)
   const account = "000-000000-00 (Banco Ejemplo)";
   const [copied, setCopied] = useState(false);
   const copyAccount = async () => {
@@ -137,28 +216,37 @@ const WeddingInvitation: React.FC = () => {
   };
 
   return (
-    <div className="inv-root" ref={ref as any}>
-      <nav className="sticky-nav">
+    <div className={styles.invRoot} ref={ref as any}>
+      {/* NAV */}
+      <nav className={`${styles.stickyNav} ${navHidden ? styles.navHidden : ""}`}>
         <a href="#inicio">Inicio</a>
-        <a href="#padres">Padres</a>
+        <a href="#invitacion">Invitación</a>
+        <a href="#pedida">Pedida</a>
+        <a href="#itinerario">Itinerario</a>
         <a href="#codigo">#pases</a>
         <a href="#rsvp">Confirmar</a>
+        <a href="#galeria">Galería</a>
         <a href="#mapa">Mapa</a>
         <a href="#mesas">Mesas</a>
       </nav>
 
-      <header id="inicio" className="card hero reveal">
-        <p className="script-subtle">Una nueva etapa que empieza con amor…</p>
-        <h1 className="title-art">Mateo Ordóñez</h1>
-        <div className="ampersand">&</div>
-        <h1 className="title-art">sdkjnskjdfn Torres</h1>
-        <p className="date-line">
-          Sábado <strong>7 de febrero de 2026</strong> · <strong>12:00</strong>{" "}
-          · Quinta Los Corteza
+      {/* HERO */}
+      <header
+        id="inicio"
+        className={`${styles.card} ${styles.hero} ${styles.reveal}`}
+        aria-label="Presentación de la boda"
+        style={{ ["--hero-image" as any]: `url(${heroImg})` }}
+      >
+        <p className={styles.scriptSubtle}>Una nueva etapa que empieza con amor…</p>
+        <h1 className={styles.titleArt}>{COUPLE.groom}</h1>
+        <div className={styles.ampersand}>&</div>
+        <h1 className={styles.titleArt}>{COUPLE.bride}</h1>
+        <p className={styles.dateLine}>
+          Sábado <strong>7 de febrero de 2026</strong> · <strong>12:00 p.m.</strong> · {VENUE}
         </p>
-        <div className="countdown">
+        <div className={styles.countdown} aria-label="Cuenta regresiva">
           {t.reached ? (
-            <span className="count-live">¡Hoy celebramos! 💍</span>
+            <span className={styles.countLive}>¡Hoy celebramos! 💍</span>
           ) : (
             <>
               <TimeBox label="Días" value={t.days} />
@@ -170,140 +258,126 @@ const WeddingInvitation: React.FC = () => {
         </div>
       </header>
 
-      {/* 5 fotos 3:4 con overlay y texto */}
-      <div className="photos-grid">
-        <PhotoPanel
-          src="/photos/1.jpg"
-          title="Nuestra historia"
-          subtitle="Un día a la vez, hasta siempre."
-        >
-          <p className="script-note">
-            “Gracias por acompañarnos en este camino.”
-          </p>
-        </PhotoPanel>
-        <PhotoPanel
-          src="/photos/2.jpg"
-          title="La ceremonia"
-          subtitle="Emoción & promesas"
+      {/* Invitación digital (papel gofrado + 16/9 para horizontal) */}
+      <section
+        id="invitacion"
+        className={`${styles.card} ${styles.paper} ${styles.reveal}`}
+        aria-label="Invitación digital"
+        style={{ ["--paper-texture" as any]: `url(${papelTexture})` }}
+      >
+        <h2 className={styles.sectionTitle}>Invitación</h2>
+        <div className={styles.inviteFrame}>
+          <div className={styles.inviteBox}>
+            <img src={invitacion} alt="Imagen de la invitación" loading="lazy" />
+          </div>
+        </div>
+      </section>
+
+      {/* Pedida de mano: autoplay */}
+      <section className={`${styles.card} ${styles.reveal}`} id="pedida" aria-label="Pedida de mano">
+        <h2 className={styles.sectionTitle}>La pedida de mano</h2>
+        <Carousel
+          items={[
+            { src: juntosAbrazo, alt: "Juntos en un abrazo", caption: "Juntos, siempre." },
+            { src: mostrandoAnillo, alt: "Mostrando el anillo", caption: "Para toda la vida." },
+            { src: arrodillado, alt: "Arrodillado entregando el anillo", caption: "El inicio de todo." },
+            { src: poniendo, alt: "Poniendo el anillo", caption: "Nuestro sí." },
+            { src: abrazoTierno, alt: "Abrazo tierno", caption: "Amor que abraza." },
+          ]}
         />
-        <PhotoPanel
-          src="/photos/3.jpg"
-          title="La celebración"
-          subtitle="Risas, abrazos y baile"
-        />
-        <PhotoPanel
-          src="/photos/4.jpg"
-          title="Nuestra familia"
-          subtitle="Con la bendición de nuestros padres"
-        />
-        <PhotoPanel
-          src="/photos/5.jpg"
-          title="Nos vemos pronto"
-          subtitle="¡Te esperamos!"
-        />
+      </section>
+
+      {/* Bloques editoriales (uniformes 3/4 con cover) */}
+      <div className={styles.photosGrid}>
+        <PhotoPanel src={inviteImg} title="Nuestra historia" subtitle="Un día a la vez, hasta siempre." />
+        <PhotoPanel src={mostrandoAnillo} title="La ceremonia" subtitle="Emoción & promesas" />
+        <PhotoPanel src={abrazoTierno} title="La celebración" subtitle="Risas, abrazos y baile" />
       </div>
 
-      <section className="grid-2">
-        <article id="padres" className="card reveal">
-          <h2 className="section-title">Con la bendición de nuestros padres</h2>
-          <ul className="parents">
+      {/* Padres + Itinerario */}
+      <section className={styles.grid2}>
+        <article id="padres" className={`${styles.card} ${styles.reveal}`} aria-label="Padres de los novios">
+          <h2 className={styles.sectionTitle}>Con la bendición de nuestros padres</h2>
+          <ul className={styles.parents}>
             <li>
-              <strong>Vicente Ordóñez</strong> & <strong>Laura Córdova</strong>{" "}
-              <span>(padres del novio)</span>
+              <strong>Vicente Ordóñez</strong> & <strong>Laura Córdova</strong> <span>(padres del novio)</span>
             </li>
             <li>
-              <strong>María Judith Aguirre Mera</strong> &{" "}
-              <strong>Jose Fredy Torres Cruz</strong>{" "}
-              <span>(padres de la novia)</span>
+              <strong>Maria Judith Aguirre Mera</strong> & <strong>Jose Fredy Torres Cruz</strong> <span>(padres de la novia)</span>
             </li>
           </ul>
-          <p className="script-note">
-            “Gracias por enseñarnos el amor en casa.”
-          </p>
         </article>
 
-        <article className="card reveal">
-          <h2 className="section-title">Itinerario</h2>
-          <ul className="timeline">
-            <li>
-              <time>12:00</time> Recepción & bienvenida
+        <article id="itinerario" className={`${styles.card} ${styles.reveal}`} data-anim="left" aria-label="Itinerario de la boda">
+          <h2 className={styles.sectionTitle}>Itinerario</h2>
+          <ul className={styles.timeline}>
+            <li className={`${styles.timelineStep} ${styles.reveal}`} data-anim="left">
+              <Icon name="welcome" /> <time>12:00</time> Recepción & bienvenida
             </li>
-            <li>
-              <time>12:30</time> Ceremonia
+            <li className={`${styles.timelineStep} ${styles.reveal}`} data-anim="left">
+              <Icon name="ring" /> <time>12:30</time> Ceremonia
             </li>
-            <li>
-              <time>13:30</time> Brindis & fotos
+            <li className={`${styles.timelineStep} ${styles.reveal}`} data-anim="left">
+              <Icon name="toast" /> <time>13:30</time> Brindis & fotos
             </li>
-            <li>
-              <time>14:00</time> Banquete & celebración
+            <li className={`${styles.timelineStep} ${styles.reveal}`} data-anim="left">
+              <Icon name="dinner" /> <time>14:00</time> Banquete & celebración
             </li>
           </ul>
-          <p className="tiny-hint">*Horarios referenciales</p>
+          <p className={styles.tinyHint}>*Horarios referenciales</p>
         </article>
       </section>
 
-      <section id="mapa" className="card reveal">
-        <h2 className="section-title">Ubicación</h2>
-        <p className="place">Quinta Los Corteza</p>
-        <a
-          className="btn"
-          href="https://www.google.com/maps/search/?api=1&query=Quinta%20Los%20Corteza"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Ver en Google Maps
-        </a>
-      </section>
-
-      <section className="grid-2">
-        <article id="codigo" className="card reveal">
-          <h2 className="section-title">
-            Tu código <span className="hash">#pases</span>
+      {/* #pases + RSVP */}
+      <section className={styles.grid2}>
+        <article id="codigo" className={`${styles.card} ${styles.reveal}`} aria-label="Consulta de pases">
+          <h2 className={styles.sectionTitle}>
+            Tu código <span className={styles.hash}>#pases</span>
           </h2>
-          <p className="muted">
-            Ingresa tu código para ver tus pases asignados.
-          </p>
-          <div className="code-row">
+          <p className={styles.muted}>Ingresa tu código para ver tus pases asignados.</p>
+          <div className={styles.codeRow}>
             <input
-              className="input"
+              className={styles.input}
               placeholder="Ej: AB123"
               value={code}
+              inputMode="text"
+              aria-label="Código de invitado"
               onChange={(e) => setCode(e.target.value)}
             />
-            <button
-              className="btn"
-              onClick={() => setCode(code.trim().toUpperCase())}
-            >
+            <button className={`${styles.btn} ${styles.rg}`} onClick={() => setCode(code.trim().toUpperCase())}>
               Buscar
             </button>
           </div>
+          <div className={styles.srOnly} aria-live="polite">
+            {guest ? `${guest.nombre} tiene ${guest.pases} pase(s)` : code ? "Código no encontrado" : ""}
+          </div>
           {guest ? (
-            <div className="code-result ok">
-              ¡Hola, <strong>{guest.nombre}</strong>! Tienes{" "}
-              <strong>{guest.pases}</strong> pase(s).
+            <div className={`${styles.codeResult} ${styles.ok}`}>
+              ¡Hola, <strong>{guest.nombre}</strong>! Tienes <strong>{guest.pases}</strong> pase(s).
             </div>
           ) : code ? (
-            <div className="code-result bad">No encontramos ese código.</div>
+            <div className={`${styles.codeResult} ${styles.bad}`}>No encontramos ese código.</div>
           ) : null}
-          <p className="tiny-hint">*Ejemplos: AB123, FAM001, VIP777.</p>
+          <p className={styles.tinyHint}>*Ejemplos: AB123, FAM001, VIP777.</p>
         </article>
 
-        <article id="rsvp" className="card reveal">
-          <h2 className="section-title">Confirmar asistencia</h2>
-          <form className="form" onSubmit={submitRSVP}>
+        <article id="rsvp" className={`${styles.card} ${styles.reveal}`} aria-label="Confirmación de asistencia">
+          <h2 className={styles.sectionTitle}>Confirmar asistencia (RSVP)</h2>
+          <form className={styles.form} onSubmit={submitRSVP}>
             <label>
               Nombre completo
               <input
-                className="input"
+                className={styles.input}
                 value={rsvpName}
                 onChange={(e) => setRsvpName(e.target.value)}
                 required
+                autoComplete="name"
               />
             </label>
             <label>
               Nº de personas
               <input
-                className="input"
+                className={styles.input}
                 type="number"
                 min={1}
                 max={10}
@@ -312,50 +386,80 @@ const WeddingInvitation: React.FC = () => {
                 required
               />
             </label>
-            <button className="btn" type="submit">
-              Enviar aceptación
-            </button>
-            {rsvpMsg && <p className="ok-msg">{rsvpMsg}</p>}
+            <button className={`${styles.btn} ${styles.rg}`} type="submit">Enviar aceptación</button>
+            {rsvpMsg && <p className={styles.okMsg} aria-live="polite">{rsvpMsg}</p>}
           </form>
         </article>
       </section>
 
-      <section id="cuenta" className="card reveal">
-        <h2 className="section-title">Detalles de regalo</h2>
-        <p className="muted">
-          Si deseas hacernos un obsequio, puedes usar esta cuenta bancaria:
-        </p>
-        <div className="account-row">
-          <code className="account">000-000000-00 (Banco Ejemplo)</code>
-          <button className="btn ghost" onClick={copyAccount}>
-            {copied ? "¡Copiado!" : "Copiar"}
-          </button>
+      {/* Galería (rejilla uniforme con cover) */}
+      <section id="galeria" className={`${styles.card} ${styles.reveal}`} aria-label="Galería de fotos">
+        <h2 className={styles.sectionTitle}>Galería</h2>
+        <div className={styles.galleryGrid}>
+          {[juntosAbrazo, mostrandoAnillo, arrodillado, poniendo, abrazoTierno, heroImg].map((g, i) => (
+            <div className={styles.galleryCell} key={i}>
+              <img className={styles.galleryImg} src={g} alt={`Foto de la galería ${i + 1}`} loading="lazy" />
+            </div>
+          ))}
         </div>
-        <p className="tiny-hint">*Cámbialo por tu banco/CLABE/IBAN.</p>
       </section>
 
-      <section id="mesas" className="card reveal">
-        <h2 className="section-title">Busca tu mesa</h2>
-        <p className="muted">Aquí va la imagen del plano (proporción 3:4).</p>
-        <div className="image-34 placeholder">Espacio para imagen 3:4</div>
+      {/* Información bancaria */}
+      <section
+        id="cuenta"
+        className={`${styles.card} ${styles.paper} ${styles.reveal}`}
+        aria-label="Detalles de regalo"
+        style={{ ["--paper-texture" as any]: `url(${papelTexture})` }}
+      >
+        <h2 className={styles.sectionTitle}>Detalles de regalo</h2>
+        <p className={styles.muted}>
+          “Tu compañía es lo más importante, pero si gustas apoyarnos en nuestro nuevo comienzo, aquí están los detalles”.
+        </p>
+        <div className={styles.accountRow}>
+          <code className={styles.account}>{account}</code>
+          <button className={`${styles.btn} ${styles.ghost}`} onClick={copyAccount}>{copied ? "¡Copiado!" : "Copiar"}</button>
+        </div>
+        <p className={styles.tinyHint}>*Cámbialo por tu banco/CLABE/IBAN.</p>
       </section>
 
-      <footer className="footer reveal">
-        <p className="script-subtle">Con amor, Mateo & Alisson</p>
-        <p className="mini">© 2026 · ¡Nos vemos en la celebración!</p>
+      {/* Ubicación con mapa embebido */}
+      <section id="mapa" className={`${styles.card} ${styles.reveal}`} aria-label="Mapa de ubicación">
+        <h2 className={styles.sectionTitle}>Ubicación</h2>
+        <p className={styles.place}>{VENUE}</p>
+        <div className={styles.mapEmbed}>
+          <iframe
+            title="Mapa de la ubicación"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            src={`https://www.google.com/maps?q=${encodeURIComponent(VENUE)}&output=embed`}
+            allowFullScreen
+          />
+        </div>
+        <a
+          className={`${styles.btn} ${styles.rg}`}
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(VENUE)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Abrir en Google Maps
+        </a>
+      </section>
+
+      {/* Buscar tu mesa (usa el mismo marco 16/9 para que acomode esquemas) */}
+      <section id="mesas" className={`${styles.card} ${styles.reveal}`} aria-label="Plano de mesas">
+        <h2 className={styles.sectionTitle}>Busca tu mesa</h2>
+        <p className={styles.muted}>Aquí va la imagen del plano (proporción 16/9 o 3/4, se recorta con cover).</p>
+        <div className={styles.inviteBox}>
+          <img src={inviteImg} alt="Plano de mesas (temporal)" loading="lazy" />
+        </div>
+      </section>
+
+      <footer className={`${styles.footer} ${styles.reveal}`} aria-label="Cierre">
+        <p className={styles.scriptSubtle}>Con amor, {COUPLE.groom.split(" ")[0]} & {COUPLE.bride.split(" ")[0]}</p>
+        <p className={styles.mini}>© 2026 · ¡Nos vemos en la celebración!</p>
       </footer>
     </div>
   );
 };
-
-const TimeBox: React.FC<{ label: string; value: number }> = ({
-  label,
-  value,
-}) => (
-  <div className="time-box">
-    <span>{String(value).padStart(2, "0")}</span>
-    <small>{label}</small>
-  </div>
-);
 
 export default WeddingInvitation;
