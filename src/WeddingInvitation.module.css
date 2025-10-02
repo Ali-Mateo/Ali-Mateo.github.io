@@ -1,5 +1,5 @@
 /* =========================
-   WeddingInvitation.module.css (clean)
+   WeddingInvitation.module.css (minimal + paper under invite + belt carousel)
    ========================= */
 
 /* Fonts */
@@ -9,74 +9,97 @@
    Tokens / palette
 ------------------------- */
 :root {
-  --rg-1: #b76e79;
-  --rg-2: #d6a6a8;
-  --rg-3: #f5e1de;
-  --gold: #c9a14a;
+  --rose-gold: #b76e79; /* acento rose gold */
+  --gold: #c9a14a; /* dorado */
+  --blush: #f5e1de; /* palo rosa */
+  --blush-2: #f9e8ee; /* palo rosa claro */
   --ink: #2b2b2b;
   --muted: #6d6d6d;
   --surface: #ffffff;
-  --shadow: 0 0.6rem 1.6rem rgba(0, 0, 0, 0.08);
-  --radius: 1.25rem;
-  --rg-grad: linear-gradient(135deg, var(--rg-1), var(--rg-2) 40%, var(--rg-3));
+
+  --rg-grad: linear-gradient(
+    135deg,
+    var(--rose-gold),
+    #d6a6a8 40%,
+    var(--blush)
+  );
 
   --font-art: "Mea Culpa", cursive;
   --font-script: "Cedarville Cursive", cursive;
   --font-serif: "Playfair Display", serif;
   --font-serif-aux: "Cormorant Garamond", serif;
   --font-sans: "Manrope", system-ui, sans-serif;
+
+  --radius: 1rem;
+  --count-h: clamp(88px, 12vh, 140px);
 }
 
 /* -------------------------
-   Global base (CSS Modules -> :global)
+   Global base
 ------------------------- */
-:global(html) {
-  font-size: clamp(0.94rem, 0.8rem + 0.6vw, 1.06rem);
-  scrollbar-gutter: stable both-edges; /* prevents layout squeeze when vertical scrollbar appears */
+:global(:root) {
+  /* La variable apunta directamente al asset dentro del CSS Module */
+  --papel-textura: url("./photos/papel.png");
+
+  /* evita heurísticas de dark mode en UI nativa (scrollbars, etc.) */
+  color-scheme: light;
 }
+
+/* Fondo global: papel en repeat + velos MUY claros (sin oscurecer) */
 :global(html),
 :global(body) {
-  width: 100%;
-  max-width: 100dvw;
   margin: 0;
-  overflow-x: hidden;
-  box-sizing: border-box;
+  color: var(--ink);
+  font-family: var(--font-serif-aux);
+  background-color: #fff; /* fallback anti-modo oscuro */
+
+  /* 4 capas: 2 radiales suaves + 1 linear suave + PAPEL en repeat */
+  background-image: radial-gradient(
+      75dvw 37.5dvw at 10% -10%,
+      rgba(255, 255, 255, 0.85) 0,
+      rgba(255, 255, 255, 0) 60%
+    ),
+    radial-gradient(
+      75dvw 37.5dvw at 90% 110%,
+      rgba(255, 255, 255, 0.85) 0,
+      rgba(255, 255, 255, 0) 60%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(247, 241, 242, 0.92) 100%
+    ),
+    var(--papel-textura);
+
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+  background-size: 100% 100%, 100% 100%, cover, 420px; /* ajusta 420px al grano que quieras */
+  background-position: center, center, center, 0 0;
+
+  /* evita bugs/oscurecidos en iOS con backgrounds fijos */
+  background-attachment: scroll, scroll, scroll, scroll;
+
+  /* sin multiply para que NO se oscurezca */
+  background-blend-mode: normal, normal, normal, normal;
 }
+
 :global(*),
 :global(*::before),
 :global(*::after) {
   box-sizing: inherit;
-}
-:global(body) {
-  color: var(--ink);
-  font-family: var(--font-serif-aux);
-  background: radial-gradient(75dvw 37.5dvw at 10% -10%, #fff 0, #fff0 60%),
-    radial-gradient(75dvw 37.5dvw at 90% 110%, #fff 0, #fff0 60%),
-    linear-gradient(180deg, #fff 0%, #f7f1f2 100%);
-}
-:global(img),
-:global(video),
-:global(canvas),
-:global(svg) {
-  max-width: 100%;
-  height: auto;
-  display: block;
 }
 
 /* -------------------------
    Root container
 ------------------------- */
 .invRoot {
-  max-width: 70rem;
+  max-width: min(120rem, 100dvw);
   margin-inline: auto;
-  padding: 4.5rem min(2dvw, 2rem) 4rem;
-  /* safe areas */
-  padding-left: max(min(2dvw, 2rem), env(safe-area-inset-left));
-  padding-right: max(min(2dvw, 2rem), env(safe-area-inset-right));
+  padding-inline: max(1rem, env(safe-area-inset-left))
+    max(1rem, env(safe-area-inset-right));
 }
 
 /* -------------------------
-   Sticky nav
+   Sticky nav (minimal)
 ------------------------- */
 .stickyNav {
   position: sticky;
@@ -84,37 +107,16 @@
   z-index: 30;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.8rem;
+  gap: 0.6rem;
   justify-content: center;
-  padding: 0.7rem 1rem;
-  /* full-viewport width to avoid clipping in mobile */
-  width: 100vw;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0 0 1.2rem 0;
-  padding-inline: max(1rem, env(safe-area-inset-left))
-    max(1rem, env(safe-area-inset-right));
-  background: color-mix(in srgb, #fff 72%, transparent);
-  backdrop-filter: blur(0.5rem);
-  border-bottom: 0.06rem solid rgba(201, 161, 74, 0.25);
-  transition: transform 0.45s ease, opacity 0.45s ease;
-}
-@supports (width: 100svw) {
-  .stickyNav {
-    width: 100svw;
-  }
-}
-@media (min-width: 1024px) {
-  .stickyNav {
-    width: 100%; /* align to .invRoot on desktop */
-    left: auto;
-    transform: none;
-    padding-inline: 0;
-  }
+  padding: 0.6rem 0.8rem;
+  background: color-mix(in srgb, #ffffff 70%, transparent);
+  backdrop-filter: blur(6px);
 }
 .navHidden {
   transform: translateY(-120%);
   opacity: 0;
+  transition: transform 0.4s, opacity 0.4s;
 }
 .stickyNav a {
   text-decoration: none;
@@ -122,112 +124,95 @@
   font-weight: 600;
   letter-spacing: 0.01em;
   font-size: clamp(0.9rem, 0.85rem + 0.3vw, 1rem);
-  padding: 0.45rem 0.85rem;
+  padding: 0.45rem 0.8rem;
   border-radius: 999rem;
-  border: 0.06rem solid transparent;
-  transition: border-color 0.25s ease, background 0.25s ease;
-  white-space: nowrap;
 }
 .stickyNav a:hover {
-  border-color: rgba(201, 161, 74, 0.5);
-  background: color-mix(in srgb, #f7ebe6 50%, transparent);
+  background: color-mix(in srgb, var(--blush) 40%, transparent);
 }
 
 /* -------------------------
-   Card
+   Invitación: papel debajo + PNG con sombra de silueta
 ------------------------- */
-.card {
-  background: var(--surface);
-  border: 0.1rem solid rgba(201, 161, 74, 0.38);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: clamp(1rem, 2dvw, 2rem);
-  margin: clamp(0.8rem, 1.2dvw, 1.4rem) auto;
-  max-width: 100%;
+.fullBleed {
+  width: 100dvw;
+  margin-left: calc(50% - 50dvw);
+  margin-right: calc(50% - 50dvw);
+}
+.inviteStack {
+  min-height: calc(
+    100dvh - var(--count-h)
+  ); /* header+invite ocupan viewport junto al countdown */
+  display: grid;
+  place-items: center;
+  padding: 0;
+  /* solo un velo transparente para que se vea el papel global del <body> */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.86) 0%,
+    rgba(255, 255, 255, 0.82) 40%,
+    rgba(249, 232, 238, 0.72) 100%
+  );
+}
+
+.paperImg {
+  grid-area: 1/1;
+  width: min(96vw, 1100px);
+  height: auto;
+  object-fit: contain;
+  /* realce sutil del papel */
+  filter: saturate(0.95) contrast(1.02);
+  opacity: 0.96;
+}
+/* PNG con sombra de silueta */
+.inviteImgShadow {
+  width: min(92vw, 1100px);
+  max-height: calc(100dvh - var(--count-h) - 4vh);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 32px rgba(183, 110, 121, 0.34))
+    drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12));
 }
 
 /* -------------------------
-   Hero
+   Tira del contador (blanco ↔ palo rosa)
 ------------------------- */
-.hero {
+/* Tira del countdown: comparte el papel y completa hasta 100dvh */
+.countStrip {
+  min-height: var(--count-h);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* velo suave; el papel ya viene del body */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(249, 232, 238, 0.9) 100%
+  );
+  padding: 1.1rem clamp(1rem, 3vw, 2rem);
   text-align: center;
-  position: relative;
-  padding: 8dvh 1.5rem 5dvh;
-  --hero-image: none;
-  overflow: hidden;
-  border-radius: var(--radius);
-}
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: center/cover no-repeat var(--hero-image);
-  filter: brightness(1.04);
-  border-radius: inherit;
-}
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.66);
-  border-radius: inherit;
-}
-.hero > * {
-  position: relative;
-  z-index: 1;
+  margin: 0;
 }
 
-/* -------------------------
-   Typography
-------------------------- */
-.titleArt {
-  font-family: var(--font-art);
-  font-size: clamp(2.2rem, 6vw, 5.2rem);
-  line-height: 1;
-  margin: 0.35rem 0;
-}
-.ampersand {
-  font-family: var(--font-art);
-  font-size: clamp(2.2rem, 5.5vw, 4.6rem);
-  background: var(--rg-grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-}
-.scriptSubtle {
-  font-family: var(--font-script);
-  font-size: clamp(1rem, 0.6rem + 1.2vw, 1.4rem);
-  color: var(--rg-1);
-  margin: 0 0 0.4rem;
-}
-.dateLine {
-  font-family: var(--font-serif);
-  font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
-  margin: 0.8rem 0 1.2rem;
-}
-.sectionTitle {
-  font-family: var(--font-serif);
-  font-weight: 600;
-  font-size: clamp(1.1rem, 0.9rem + 0.6vw, 1.4rem);
-  text-align: center;
-  margin: 0 0 1rem;
-}
-
-/* -------------------------
-   Countdown
-------------------------- */
 .countdown {
   display: grid;
   grid-template-columns: repeat(4, minmax(4.2rem, 1fr));
   gap: 0.6rem;
   justify-items: center;
+  align-items: center;
+  max-width: 60rem;
+  margin-inline: auto;
+}
+@media (max-width: 360px) {
+  .countdown {
+    grid-template-columns: repeat(2, minmax(4.2rem, 1fr));
+  }
 }
 .timeBox {
-  background: linear-gradient(180deg, #fff, #fff8);
-  border: 0.06rem solid rgba(201, 161, 74, 0.55);
-  border-radius: 0.9rem;
-  padding: 0.6rem 0.5rem;
+  background: #fff;
+  border-radius: 0.8rem;
+  padding: 0.55rem 0.5rem;
   min-width: 4.2rem;
   text-align: center;
 }
@@ -251,102 +236,113 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
-/* -------------------------
-   Embossed paper
-------------------------- */
-.paper {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-.paper::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--paper-texture) center/cover repeat;
-  opacity: 0.3;
-  mix-blend-mode: multiply;
-  pointer-events: none;
+.countNote {
+  margin: 0.4rem 0 0;
+  color: var(--ink);
+  font-family: var(--font-serif);
 }
 
 /* -------------------------
-   Invitation (16/9)
+   Títulos / tipografía / utilidades
 ------------------------- */
-.inviteFrame {
-  display: grid;
-  place-items: center;
-  padding: 0.8rem;
-  border-radius: 1rem;
-  border: 0.1rem solid rgba(201, 161, 74, 0.35);
-  background: linear-gradient(180deg, #fff, #fff8);
-  box-shadow: var(--shadow);
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: clamp(1.1rem, 0.9rem + 0.6vw, 1.35rem);
+  text-align: center;
+  margin: 1.2rem 0 0.8rem;
+}
+.scriptSubtle {
+  font-family: var(--font-script);
+  color: var(--rose-gold);
+}
+.hash {
+  color: var(--rose-gold);
+}
+.muted {
+  color: var(--muted);
+}
+
+/* Card neutral (sin bordes, padding ni sombras) */
+.card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: clamp(0.8rem, 1.2dvw, 1.2rem) 0;
   max-width: 100%;
 }
-.inviteBox {
-  width: 100%;
-  max-width: 58rem;
-  aspect-ratio: 16/9;
-  border-radius: 0.9rem;
-  overflow: hidden;
-  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.08);
-  max-width: 100%;
-}
-.inviteBox img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
 
 /* -------------------------
-   Carousel
+   Carrusel "cinta transbordadora"
 ------------------------- */
 .carousel {
   position: relative;
   overflow: hidden;
   contain: content;
 }
-.carTrack {
+.carMarquee {
   display: flex;
   gap: 0.8rem;
-  padding-bottom: 0.2rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  overflow-anchor: none;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: auto;
-  overscroll-behavior-inline: contain;
-  padding-inline: 0.1px; /* guardrail iOS */
+  width: max-content;
+  /* una vuelta completa (trasladar el 50% porque duplicamos los ítems) */
+  animation: marquee var(--marquee-duration, 45s) linear infinite;
 }
-.carTrack::-webkit-scrollbar {
-  display: none;
+.carousel:hover .carMarquee {
+  animation-play-state: paused;
 }
+@media (prefers-reduced-motion: reduce) {
+  .carMarquee {
+    animation: none;
+  }
+}
+
+/* Slides (mismo tamaño en ambas mitades para loop perfecto) */
 .carSlide {
-  flex: 0 0 85%;
-  max-width: 85%;
+  flex: 0 0 min(82vw, 28rem);
+  max-width: min(82vw, 28rem);
   aspect-ratio: 3/4;
   border-radius: var(--radius);
   overflow: hidden;
   background: #fff;
-  box-shadow: var(--shadow);
   position: relative;
-  scroll-snap-align: center;
 }
+@media (min-width: 48rem) {
+  .carSlide {
+    flex-basis: 40vw;
+    max-width: 40vw;
+  }
+}
+@media (min-width: 80rem) {
+  .carSlide {
+    flex-basis: 28rem;
+    max-width: 28rem;
+  }
+}
+
 .carSlide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 .carCaption {
   position: absolute;
   inset: auto 0 0 0;
   padding: 0.6rem 1rem;
-  font-size: clamp(0.9rem, 0.85rem + 0.25vw, 1rem);
   color: #fff;
   background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.45));
   text-align: center;
+  font-size: clamp(0.9rem, 0.85rem + 0.25vw, 1rem);
+}
+
+/* Animación del loop (dos mitades idénticas → trasladamos -50%) */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 /* -------------------------
@@ -357,14 +353,19 @@
   grid-template-columns: 1fr;
   gap: 0.9rem;
 }
-@media (min-width: 48rem) {
+@media (min-width: 40rem) {
+  .photosGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 62rem) {
   .photosGrid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 .photoPanel {
   position: relative;
-  border-radius: 1.1rem;
+  border-radius: 0.9rem;
   overflow: hidden;
   aspect-ratio: 3/4;
 }
@@ -379,7 +380,7 @@
 .photoOverlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.5);
 }
 .photoContent {
   position: relative;
@@ -403,7 +404,7 @@
 ------------------------- */
 .grid2 {
   display: grid;
-  gap: 2rem;
+  gap: clamp(1rem, 2.5vw, 2rem);
   grid-template-columns: 1fr;
 }
 @media (min-width: 48rem) {
@@ -433,25 +434,27 @@
 }
 .timelineStep time {
   font-weight: 700;
-  color: var(--rg-1);
+  color: var(--rose-gold);
 }
-
-/* Icons */
 .rgStroke {
-  stroke: var(--rg-1);
+  stroke: var(--rose-gold);
 }
 
 /* -------------------------
-   Forms & utilities
+   Formularios y utilidades
 ------------------------- */
+.form {
+  display: grid;
+  gap: 0.6rem;
+}
 .input {
   width: 100%;
   padding: 0.65rem 0.8rem;
   border-radius: 0.6rem;
-  border: 0.08rem solid rgba(201, 161, 74, 0.4);
+  border: 1px solid color-mix(in srgb, var(--rose-gold) 35%, #0000);
   background: #fff;
   font: inherit;
-  margin: 0.4rem 0;
+  margin: 0.3rem 0;
 }
 .btn {
   padding: 0.65rem 1.1rem;
@@ -466,24 +469,14 @@
 }
 .ghost {
   background: transparent;
-  border: 0.08rem solid var(--rg-1);
-  color: var(--rg-1);
-}
-.hash {
-  color: var(--rg-1);
-}
-.muted {
-  color: var(--muted);
-}
-.tinyHint {
-  color: var(--muted);
-  font-size: 0.9rem;
-  margin-top: 0.4rem;
+  border: 1px solid var(--rose-gold);
+  color: var(--rose-gold);
 }
 .codeRow {
   display: flex;
   gap: 0.6rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 .codeResult {
   margin-top: 0.5rem;
@@ -498,7 +491,26 @@
   color: #137a25;
 }
 
-/* a11y helpers (missing before) */
+.accountRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
+.account {
+  display: inline-block;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.4rem;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--gold) 30%, #0000);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+  font-size: 0.95em;
+  word-break: break-word;
+}
+
+/* a11y */
 .srOnly {
   position: absolute !important;
   width: 1px;
@@ -511,46 +523,29 @@
   border: 0;
 }
 
-/* Parents list + place label */
-.parents {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 0.4rem;
-  text-align: center;
-}
-.parents span {
-  color: var(--muted);
-  font-size: 0.95em;
-}
-.place {
-  text-align: center;
-  font-family: var(--font-serif);
-  font-weight: 600;
-  margin: 0.25rem 0 1rem;
-}
-
 /* -------------------------
    Gallery
 ------------------------- */
 .galleryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
   gap: 0.9rem;
+}
+@media (min-width: 62rem) {
+  .galleryGrid {
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  }
 }
 .galleryCell {
   aspect-ratio: 3/4;
-  border-radius: var(--radius);
+  border-radius: 0.9rem;
   overflow: hidden;
-  box-shadow: var(--shadow);
   background: #fff;
 }
 .galleryImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
 /* -------------------------
@@ -558,9 +553,9 @@
 ------------------------- */
 .mapEmbed {
   width: 100%;
-  height: 50dvh;
+  height: clamp(300px, 50dvh, 560px);
   border: none;
-  border-radius: var(--radius);
+  border-radius: 0.9rem;
   overflow: hidden;
 }
 .mapEmbed iframe {
@@ -569,12 +564,24 @@
   border: 0;
   display: block;
 }
-.image34 {
+.place {
+  text-align: center;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  margin: 0.25rem 0 1rem;
+}
+
+/* Plano auxiliar (mesas) */
+.inviteBox {
   width: 100%;
   aspect-ratio: 16/9;
+  border-radius: 0.9rem;
+  overflow: hidden;
+}
+.inviteBox img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
 }
 
 /* -------------------------
@@ -604,26 +611,8 @@
   opacity: 1;
   transform: none;
 }
-
-/* On small screens avoid X-shift inside overflow:hidden containers */
 @media (max-width: 520px) {
   .reveal[data-anim="left"] {
     transform: translateY(0.75rem);
-  }
-}
-
-/* -------------------------
-   Responsive tweaks
-------------------------- */
-@media (min-width: 1200px) {
-  .invRoot {
-    max-width: min(92rem, 100dvw - 4rem);
-  }
-}
-
-/* Optional: hero edge-to-edge feel on wide screens */
-@media (min-width: 1200px) {
-  .hero {
-    margin-inline: calc(-1 * clamp(1rem, 2vw, 2rem));
   }
 }
