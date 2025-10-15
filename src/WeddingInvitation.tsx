@@ -57,6 +57,33 @@ function useCountdown(targetISO: string) {
   };
 }
 
+function useScrollTrigger(
+  ref: React.RefObject<HTMLDivElement | null>,
+  offset = 0.3
+) {
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.intersectionRatio >= offset) {
+          setActive(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: Array.from({ length: 10 }, (_, i) => i / 10) }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ref, offset]);
+
+  return active;
+}
+
 function useReveal() {
   const ref = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -279,6 +306,9 @@ const WeddingInvitation: React.FC = () => {
     setTimeout(() => setCopied(false), 1600);
   };
 
+  const inviteRef = useRef<HTMLDivElement>(null);
+  const showInvite = useScrollTrigger(inviteRef, 0.3);
+
   return (
     <div
       className={styles.pageTile}
@@ -310,7 +340,12 @@ const WeddingInvitation: React.FC = () => {
         </nav>
 
         <section id="invitacion" className={styles.inviteSection}>
-          <div className={styles.envelopeContainer}>
+          <div
+            ref={inviteRef}
+            className={`${styles.envelopeContainer} ${
+              showInvite ? styles.active : ""
+            }`}
+          >
             <div className={styles.envelope}>
               <div className={styles.envelopeBody}></div>
               <div className={styles.foldLeft}></div>
@@ -347,11 +382,12 @@ const WeddingInvitation: React.FC = () => {
             </div>
 
             {/* Banda y sello */}
-            <div className={styles.bottomBand}></div>
-            <div className={styles.paperStrip}></div>
-            <div className={styles.waxSealWrapper}>
-              <div className={styles.waxSeal}>
-                <span>MyA</span>
+            <div className={styles.bottomBand}>
+              <div className={styles.paperStrip}></div>
+              <div className={styles.waxSealWrapper}>
+                <div className={styles.waxSeal}>
+                  <span>MyA</span>
+                </div>
               </div>
             </div>
           </div>

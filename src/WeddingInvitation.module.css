@@ -94,9 +94,8 @@
    Root container
 ------------------------- */
 .invRoot {
-  max-width: min(120rem, 100dvw);
-  margin-inline: auto;
-  padding-inline: max(1rem, env(safe-area-inset-left))
+  max-width: min(120rem, 97dvw);
+  padding-inline: max(3dvw, env(safe-area-inset-left))
     max(1rem, env(safe-area-inset-right));
 }
 
@@ -945,14 +944,13 @@ section {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 3rem 1rem 6rem;
-  width: 360px;
+  width: 320px;
 }
 
 .envelopeContainer {
   height: 380px;
   position: relative;
-  width: min(95vw, 360px);
+  width: 320px;
   margin: 5rem auto;
 }
 
@@ -963,6 +961,7 @@ section {
   height: 180px;
   background: transparent;
   margin: 2rem auto;
+  animation: slideFromTopLeft 0.9s ease-out both;
   filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.85));
 }
 
@@ -1025,7 +1024,7 @@ section {
 .inviteCard {
   position: absolute;
   top: 25%; /* un poco más abajo */
-  left: 68%; /* centrada horizontalmente */
+  left: 60%; /* centrada horizontalmente */
   transform: translate(-50%, 0); /* corrige el desplazamiento */
   width: 65%; /* más estrecha para móvil */
   background: #fffaf7;
@@ -1034,6 +1033,7 @@ section {
   padding: 0.5rem 0.5rem;
   text-align: center;
   z-index: 8;
+   animation: slideFromRight 1s ease-out ;
 }
 
 .inviteIntro {
@@ -1113,11 +1113,10 @@ section {
 
 /* --- Capa 4.5: Papel blanco encima de la banda --- */
 .paperStrip {
-  position: absolute;
-  bottom: 2%; /* ajusta según el alto del sello */
+  position: absolute; /* ajusta según el alto del sello */
   left: 50%;
-  transform: translateX(-50%);
-  width: 50%;
+  top: 15%;
+  width: 80%;
   height: 70px;
   background: #fffaf6;
   z-index: 2;
@@ -1152,4 +1151,127 @@ section {
     inset 0 2px 4px rgba(255, 255, 255, 0.4),
     inset 0 -2px 4px rgba(0, 0, 0, 0.2),
     0 4px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* === Animaciones de entrada === */
+@keyframes slideFromTopLeft {
+  from {
+    opacity: 0;
+    transform: translate(-50px, -50px) rotate(-5deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes slideFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.inviteCard {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 65%;
+  background: #fffaf7;
+  border-radius: 0.4rem;
+  box-shadow: 0 15px 20px rgba(0, 0, 0, 0.55);
+  padding: 0.5rem;
+  text-align: center;
+  z-index: 8;
+  animation: slideCardIn 1s ease-out both;
+}
+
+@keyframes slideCardIn {
+  from {
+    opacity: 0;
+    transform: translate(80px, 0); /* entra desde la derecha */
+  }
+  to {
+    opacity: 1;
+    transform: translate(-30%, 0); /* posición final centrada */
+  }
+}
+
+/* === Animaciones adicionales para las capas === */
+
+/* Envelope (desde arriba a la izquierda) */
+.envelope {
+  animation: slideFromTopLeft 0.9s ease-out both;
+}
+
+/* Tarjeta principal (desde la derecha) */
+.inviteCard {
+  animation: slideCardIn 1s ease-out both;
+}
+
+/* Tarjeta oval (desde la izquierda) */
+.ovalCard {
+  animation: slideFromLeft 1s ease-out both;
+}
+
+/* Retrasos opcionales para efecto secuencial */
+.envelope { animation-delay: 0.5s; }
+.inviteCard { animation-delay: 0.8s; }
+.ovalCard { animation-delay: 1.2s; }
+
+/* --- Animación especial para la banda inferior --- */
+@keyframes slideFromBottomFixed {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(80px); /* mantiene el centrado */
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Aplica la nueva animación */
+.bottomBand, .paperStrip, .waxSeal {
+  animation: slideFromBottomFixed 1s ease-out both;
+  animation-delay: 0.9s; /* opcional: efecto secuencial */
+}
+
+/* Animaciones solo al entrar en vista */
+.envelopeContainer * {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: transform 0.8s ease-out, opacity 0.8s ease-out;
+}
+
+.envelopeContainer.active * {
+  opacity: 1;
+  transform: none;
 }
