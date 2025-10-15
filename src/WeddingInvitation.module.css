@@ -104,22 +104,34 @@
    Sticky nav (minimal)
 ------------------------- */
 .stickyNav {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 30;
+  left: 0;
+  right: 0;
+  z-index: 100;
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
   justify-content: center;
-  padding: 0.6rem 0.8rem;
-  background: color-mix(in srgb, #ffffff 70%, transparent);
-  backdrop-filter: blur(6px);
-}
-.navHidden {
-  transform: translateY(-120%);
+  padding: 0.7rem 1rem;
+  background: color-mix(in srgb, #ffffff 80%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-100%);
   opacity: 0;
-  transition: transform 0.4s, opacity 0.4s;
+  transition: transform 0.4s ease, opacity 0.4s ease;
 }
+
+.navVisible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.navHidden {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
 .stickyNav a {
   text-decoration: none;
   color: var(--ink);
@@ -882,4 +894,8 @@
   font-size: clamp(1.1rem, 0.9rem + 0.6vw, 1.35rem);
   margin-top: 1.2rem;
   color: var(--rose-gold);
+}
+
+section{
+  margin: 5rem auto;
 }

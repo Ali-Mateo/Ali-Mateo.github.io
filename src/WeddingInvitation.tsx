@@ -69,21 +69,33 @@ function useReveal() {
   return ref;
 }
 
-function useHideOnScroll() {
-  const [hidden, setHidden] = useState(false);
+function useHideOnScroll(heroHeight = window.innerHeight) {
+  const [state, setState] = useState<"hidden" | "visible" | "aboveHero">(
+    "aboveHero"
+  );
   const lastY = useRef(0);
 
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
-      setHidden(y > lastY.current && y > 80); // ocultar si bajo rápido y no estoy arriba del todo
+      const goingDown = y > lastY.current;
+      const pastHero = y > heroHeight * 0.8;
+
+      if (!pastHero) {
+        setState("aboveHero");
+      } else if (goingDown) {
+        setState("hidden");
+      } else {
+        setState("visible");
+      }
+
       lastY.current = y;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [heroHeight]);
 
-  return hidden;
+  return state;
 }
 
 /* =====================
@@ -269,7 +281,13 @@ const WeddingInvitation: React.FC = () => {
       <div className={styles.invRoot} ref={ref as any}>
         {/* NAV */}
         <nav
-          className={`${styles.stickyNav} ${navHidden ? styles.navHidden : ""}`}
+          className={`${styles.stickyNav} ${
+            navHidden === "visible"
+              ? styles.navVisible
+              : navHidden === "hidden"
+              ? styles.navHidden
+              : ""
+          }`}
         >
           <a href="#invitacion">Inicio</a>
           <a href="#invitacion">Invitación</a>
@@ -320,7 +338,7 @@ const WeddingInvitation: React.FC = () => {
             </div>
           </div>
           <div className={styles.fecha}>
-          Sábado <strong>7 de febrero de 2026</strong>
+            Sábado <strong>7 de febrero de 2026</strong>
           </div>
         </section>
 
