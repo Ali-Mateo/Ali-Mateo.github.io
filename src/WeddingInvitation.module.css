@@ -759,3 +759,72 @@
   color: var(--ink);
   line-height: 1.35;
 }
+
+/* ========== Cover hero (portada) con capa media negra ========== */
+.coverHero {
+  width: 100dvw;
+  height: 100vh;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  --hero-progress: 0;
+  --hero-translate: 0px;
+  transform: translateY(var(--hero-translate));
+  opacity: calc(1 - var(--hero-progress));
+  transition: transform 0.12s linear, opacity 0.12s linear;
+  will-change: transform, opacity;
+  z-index: 5;
+}
+
+/* Capa media negra semitransparente (entre fondo y máscara/degradado) */
+.coverHero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.58); /* <-- ajusta la opacidad aquí (0.2 - 0.6 típico) */
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Máscara/degradado para dar contraste extra (ahora encima de la capa negra) */
+.coverHero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.04) 40%, rgba(0,0,0,0.10) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.coverOverlay {
+  position: relative;
+  z-index: 3; /* contenido encima de la capa negra y la máscara */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+}
+
+.coverTitle {
+  font-family: var(--font-script);
+  color: #fff;
+  text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  font-size: clamp(2.2rem, 7vw, 5rem);
+  margin: 0;
+  letter-spacing: 0.02em;
+  transform: translateY(0);
+}
+
+/* Reduce movimiento si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+  .coverHero {
+    transition: none;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

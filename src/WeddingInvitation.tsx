@@ -180,6 +180,51 @@ const ScrollImage: React.FC<{ src: string; alt?: string; ratio?: string }> = ({
   );
 };
 
+/* ---- CoverHero: portada que se oculta al hacer scroll ---- */
+const CoverHero: React.FC<{ src: string; alt?: string }> = ({ src, alt }) => {
+  const ref = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const onScroll = () => {
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      // progress: 0 (completamente visible) -> 1 (ya pasada una pantalla)
+      const progress = Math.min(Math.max(-rect.top / vh, 0), 1);
+      // translate en px (puedes ajustar el 80 para mayor movimiento)
+      const translate = progress * -80;
+      el.style.setProperty("--hero-progress", String(progress));
+      el.style.setProperty("--hero-translate", `${translate}px`);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  return (
+    <header
+      ref={ref}
+      className={styles.coverHero}
+      role="img"
+      aria-label={alt || "Portada"}
+      style={{ backgroundImage: `url(${src})` }}
+    >
+      <div className={styles.coverOverlay}>
+        <h1 className={styles.coverTitle}>
+          {COUPLE.groom.split(" ")[0]} &amp; {COUPLE.bride.split(" ")[0]}
+        </h1>
+      </div>
+    </header>
+  );
+};
+
 /* =====================
    Componente principal
 ===================== */
@@ -228,6 +273,8 @@ const WeddingInvitation: React.FC = () => {
       className={styles.pageTile}
       style={{ backgroundImage: `url(${papelTexture})` }}
     >
+      <CoverHero src={mostrandoAnillo} alt="Portada: manos y anillo" />
+
       <div className={styles.invRoot} ref={ref as any}>
         {/* NAV */}
         <nav
@@ -347,7 +394,7 @@ const WeddingInvitation: React.FC = () => {
 
         {/* 3. Imagen sin bordes con efecto al hacer scroll */}
         <ScrollImage
-          src={mostrandoAnillo}
+          src={heroImg}
           alt="Detalle del anillo"
           ratio="21/9"
         />
@@ -378,7 +425,10 @@ const WeddingInvitation: React.FC = () => {
             </div>
 
             <div className={styles.itineraryItem}>
-              <UtensilsCrossed className={styles.itineraryIcon} strokeWidth={1.4} />
+              <UtensilsCrossed
+                className={styles.itineraryIcon}
+                strokeWidth={1.4}
+              />
               <p>14:00 · Banquete & Celebración</p>
             </div>
           </div>
@@ -387,7 +437,7 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* 5. Imagen como la 3 */}
-        <ScrollImage src={heroImg} alt="Manos y anillo" ratio="21/9" />
+        <ScrollImage src={poniendo} alt="Manos y anillo" ratio="21/9" />
 
         {/* 6. #pases */}
         <section
@@ -538,35 +588,35 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* Ubicación */}
-      <section
-        id="mapa"
-        className={`${styles.card} ${styles.reveal}`}
-        aria-label="Mapa de ubicación"
-      >
-        <h2 className={styles.sectionTitle}>Ubicación</h2>
-        <p className={styles.place}>{VENUE}</p>
-        <div className={styles.mapEmbed}>
-          <iframe
-            title="Mapa de la ubicación"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            src={`https://www.google.com/maps?q=${encodeURIComponent(
-              VENUE
-            )}&output=embed`}
-            allowFullScreen
-          />
-        </div>
-        <a
-          className={`${styles.btn} ${styles.rg}`}
-          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-            VENUE
-          )}`}
-          target="_blank"
-          rel="noopener noreferrer"
+        <section
+          id="mapa"
+          className={`${styles.card} ${styles.reveal}`}
+          aria-label="Mapa de ubicación"
         >
-          Abrir en Google Maps
-        </a>
-      </section>
+          <h2 className={styles.sectionTitle}>Ubicación</h2>
+          <p className={styles.place}>{VENUE}</p>
+          <div className={styles.mapEmbed}>
+            <iframe
+              title="Mapa de la ubicación"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              src={`https://www.google.com/maps?q=${encodeURIComponent(
+                VENUE
+              )}&output=embed`}
+              allowFullScreen
+            />
+          </div>
+          <a
+            className={`${styles.btn} ${styles.rg}`}
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              VENUE
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Abrir en Google Maps
+          </a>
+        </section>
 
         {/* 12. Ubica tu mesa */}
         <section
