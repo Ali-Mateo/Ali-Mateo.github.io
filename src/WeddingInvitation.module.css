@@ -183,62 +183,6 @@
 }
 
 /* -------------------------
-   Tira del contador (blanco ↔ palo rosa)
-------------------------- */
-.countStrip {
-  margin-block: 0;
-  background: linear-gradient(180deg, #ffffff 0%, var(--blush-2) 100%);
-  padding: 1.1rem clamp(1rem, 3vw, 2rem);
-  text-align: center;
-}
-.countdown {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(4.2rem, 1fr));
-  gap: 0.6rem;
-  justify-items: center;
-  align-items: center;
-  max-width: 60rem;
-  margin-inline: auto;
-}
-@media (max-width: 360px) {
-  .countdown {
-    grid-template-columns: repeat(2, minmax(4.2rem, 1fr));
-  }
-}
-.timeBox {
-  background: #fff;
-  border-radius: 0.8rem;
-  padding: 0.55rem 0.5rem;
-  min-width: 4.2rem;
-  text-align: center;
-}
-.timeBox span {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: clamp(1.1rem, 0.8rem + 1.5vw, 1.7rem);
-  background: var(--rg-grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.timeBox small {
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-.countLive {
-  font-weight: 700;
-  background: var(--rg-grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.countNote {
-  margin: 0.4rem 0 0;
-  color: var(--ink);
-  font-family: var(--font-serif);
-}
-
-/* -------------------------
    Títulos / tipografía / utilidades
 ------------------------- */
 .sectionTitle {
@@ -827,4 +771,115 @@
     transform: none !important;
     opacity: 1 !important;
   }
+}
+
+/* =========================
+   Contador refinado para fondo claro
+   ========================= */
+
+.countdown {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2.4rem; /* más espacio entre columnas */
+  flex-wrap: wrap;
+}
+
+.timeBox {
+  text-align: center;
+  background: transparent;
+  min-width: 4.5rem;
+}
+
+.timeBox span {
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  color: #333; /* más contraste */
+  letter-spacing: 0.02em;
+  display: block;
+}
+
+.timeBox small {
+  display: block;
+  font-family: "Manrope", sans-serif;
+  font-size: 0.75rem;
+  color: #a97d6c; /* rose gold más cálido */
+  letter-spacing: 0.15em;
+  margin-top: 0.4rem;
+  text-transform: uppercase;
+}
+.timeBox + .timeBox {
+  position: relative;
+}
+
+.timeBox + .timeBox::before {
+  content: ":";
+  position: absolute;
+  left: -1.2rem;         /* mueve el ":" a la izquierda del bloque siguiente */
+  top: 50%;              /* centrado vertical */
+  transform: translateY(-50%);
+  color: #c68a70;        /* tono rose gold */
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+
+/* --- Círculo principal más limpio --- */
+.countCircle {
+  position: relative;
+  width: 9rem;
+  height: 9rem;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at 50% 40%, #fff 40%, #f8f4f3 100%);
+  border: 1px solid #e4d7d2;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  margin: 0 auto 2rem auto;
+}
+
+.countCircle > div {
+  transform: translateY(-0.15rem);
+}
+
+.countCircle > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.countCircle span {
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+  font-size: 3.2rem;
+  color: #a05b4b; /* Rose gold oscuro */
+  line-height: 1;
+}
+
+.countCircle small {
+  font-family: "Manrope", sans-serif;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #b07a6b;
+  margin-top: 0.3rem;
+}
+
+.countStrip {
+  margin: 5rem auto;
+}
+
+.fecha {
+  text-align: center;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: clamp(1.1rem, 0.9rem + 0.6vw, 1.35rem);
+  margin-top: 1.2rem;
+  color: var(--rose-gold);
 }

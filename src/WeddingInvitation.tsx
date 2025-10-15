@@ -89,15 +89,6 @@ function useHideOnScroll() {
 /* =====================
    UI Helpers
 ===================== */
-const TimeBox: React.FC<{ label: string; value: number }> = ({
-  label,
-  value,
-}) => (
-  <div className={styles.timeBox} aria-label={`${label} restantes`}>
-    <span>{String(value).padStart(2, "0")}</span>
-    <small>{label}</small>
-  </div>
-);
 
 /* Carrusel tipo cinta transbordadora (scroll continuo, sin saltos) */
 const Carousel: React.FC<{
@@ -307,26 +298,30 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* CONTADOR */}
-        <section
-          className={`${styles.countStrip} ${styles.reveal}`}
-          aria-label="Cuenta regresiva"
-        >
-          <div className={styles.countdown}>
-            {t.reached ? (
-              <span className={styles.countLive}>¡Hoy celebramos! 💍</span>
-            ) : (
-              <>
-                <TimeBox label="Días" value={t.days} />
-                <TimeBox label="Horas" value={t.hours} />
-                <TimeBox label="Min" value={t.minutes} />
-                <TimeBox label="Seg" value={t.seconds} />
-              </>
-            )}
+        <section className={styles.countStrip}>
+          <div className={styles.countCircle}>
+            <div>
+              <span>{t.days}</span>
+              <small>días</small>
+            </div>
           </div>
-          <p className={styles.countNote}>
-            Sábado <strong>7 de febrero de 2026</strong> ·{" "}
-            <strong>12:00 p.m.</strong> · {VENUE}
-          </p>
+          <div className={styles.countdown}>
+            <div className={styles.timeBox}>
+              <span>{t.hours}</span>
+              <small>horas</small>
+            </div>
+            <div className={styles.timeBox}>
+              <span>{t.minutes}</span>
+              <small>minutos</small>
+            </div>
+            <div className={styles.timeBox}>
+              <span>{t.seconds}</span>
+              <small>segundos</small>
+            </div>
+          </div>
+          <div className={styles.fecha}>
+          Sábado <strong>7 de febrero de 2026</strong>
+          </div>
         </section>
 
         {/* ====== REORGANIZACIÓN A PARTIR DEL CARRUSEL ====== */}
@@ -393,11 +388,7 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* 3. Imagen sin bordes con efecto al hacer scroll */}
-        <ScrollImage
-          src={heroImg}
-          alt="Detalle del anillo"
-          ratio="21/9"
-        />
+        <ScrollImage src={heroImg} alt="Detalle del anillo" ratio="21/9" />
 
         {/* 4. Itinerario */}
         <section
