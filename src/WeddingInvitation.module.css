@@ -759,7 +759,12 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.58); /* <-- ajusta la opacidad aquí (0.2 - 0.6 típico) */
+  background: rgba(
+    0,
+    0,
+    0,
+    0.58
+  ); /* <-- ajusta la opacidad aquí (0.2 - 0.6 típico) */
   z-index: 1;
   pointer-events: none;
 }
@@ -769,7 +774,12 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.04) 40%, rgba(0,0,0,0.10) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.18) 0%,
+    rgba(0, 0, 0, 0.04) 40%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
   pointer-events: none;
   z-index: 2;
 }
@@ -787,7 +797,7 @@
 .coverTitle {
   font-family: var(--font-script);
   color: #fff;
-  text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   font-size: clamp(2.2rem, 7vw, 5rem);
   margin: 0;
   letter-spacing: 0.02em;
@@ -846,15 +856,14 @@
 .timeBox + .timeBox::before {
   content: ":";
   position: absolute;
-  left: -1.2rem;         /* mueve el ":" a la izquierda del bloque siguiente */
-  top: 50%;              /* centrado vertical */
+  left: -1.2rem; /* mueve el ":" a la izquierda del bloque siguiente */
+  top: 50%; /* centrado vertical */
   transform: translateY(-50%);
-  color: #c68a70;        /* tono rose gold */
+  color: #c68a70; /* tono rose gold */
   font-size: 2rem;
   font-weight: 600;
   line-height: 1;
 }
-
 
 /* --- Círculo principal más limpio --- */
 .countCircle {
@@ -914,7 +923,7 @@
   color: var(--rose-gold);
 }
 
-section{
+section {
   margin: 5rem auto;
 }
 
@@ -930,4 +939,217 @@ section{
 .itineraryIconImg:hover {
   transform: scale(1.08);
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+}
+
+.inviteSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 1rem 6rem;
+  width: 360px;
+}
+
+.envelopeContainer {
+  height: 380px;
+  position: relative;
+  width: min(95vw, 360px);
+  margin: 5rem auto;
+}
+
+/* --- Capa 1: Sobre --- */
+.envelope {
+  position: relative;
+  width: 240px;
+  height: 180px;
+  background: transparent;
+  margin: 2rem auto;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.85));
+}
+
+/* --- cuerpo del sobre --- */
+.envelopeBody {
+  position: absolute;
+  inset: 0;
+  background: #eec4a9;
+  z-index: 1;
+  clip-path: polygon(0 100%, 100% 100%, 100% 25%, 50% 0, 0 25%);
+}
+
+
+/* --- solapa superior --- */
+.envelopeTop {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 70%;
+  background: linear-gradient(to left, #f7dbcc, #eecebb);
+  clip-path: polygon(5% 45%, 50% 10%, 95% 45%, 95% 100%, 5% 100%);
+  z-index: 2;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* --- alas laterales --- */
+.foldLeft,
+.foldRight {
+  position: absolute;
+  top: 50%;
+  width: 50%;
+  height: 70%;
+  z-index: 3;
+}
+
+.foldLeft {
+  left: 0;
+  background: linear-gradient(to right, #ddac8e, #dcb095, #eec4a9, #eec4a9);
+  clip-path: polygon(0 0, 100% 50%, 100% 100%, 0 100%);
+}
+
+.foldRight {
+  right: 0;
+  background: linear-gradient(to right, #cd9877, #eec4a9);
+  clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);
+}
+
+/* --- solapa inferior --- */
+.envelopeBottom {
+  position: absolute;
+  top: 70%;
+  width: 100%;
+  height: 50%;
+  background: linear-gradient(to left, #cd9877, #eec4a9);
+  clip-path: polygon(20% 0%, 80% 0, 100% 100%, 0% 100%);
+  z-index: 3;
+}
+
+/* --- Capa 2: Tarjeta principal (ajustada) --- */
+.inviteCard {
+  position: absolute;
+  top: 25%; /* un poco más abajo */
+  left: 68%; /* centrada horizontalmente */
+  transform: translate(-50%, 0); /* corrige el desplazamiento */
+  width: 65%; /* más estrecha para móvil */
+  background: #fffaf7;
+  border-radius: 0.4rem;
+  box-shadow: 0 15px 20px rgba(0, 0, 0, 0.55);
+  padding: 0.5rem 0.5rem;
+  text-align: center;
+  z-index: 8;
+}
+
+.inviteIntro {
+  font-size: 0.6rem;
+  font-family: var(--font-serif-aux);
+  color: var(--muted);
+  margin-bottom: 0.7rem;
+  line-height: 1.3;
+}
+
+.inviteNames {
+  font-family: "Mea Culpa", cursive;
+  color: var(--ink);
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  margin: 0.3rem 0 0.4rem;
+  line-height: 1.1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.inviteNames span {
+  display: block;
+  font-family: "Mea Culpa", cursive; /* igual que los nombres */
+  font-size: 0.5em; /* ligeramente más pequeño */
+  line-height: 0.7; /* lo acerca al nombre de arriba */
+  color: var(--rose-gold);
+  margin: 0.1rem 0;
+}
+
+.inviteDetails {
+  color: var(--ink);
+  font-size: 0.6rem;
+  line-height: 1;
+}
+
+.inviteDetails strong {
+  color: var(--rose-gold);
+  font-size: 1rem;
+}
+
+/* --- Capa 3: Tarjeta oval --- */
+.ovalCard {
+  box-shadow: 0 15px 20px rgba(0, 0, 0, 0.55);
+  line-height: 0.8;
+  position: absolute;
+  left: 5%;
+  bottom: 10%;
+  background: #fffaf7;
+  border-radius: 50%;
+  width: 80px;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 1rem;
+  color: var(--muted);
+  z-index: 3;
+  font-family: "Mea Culpa", cursive;
+}
+
+/* --- Capa 4: Banda inferior --- */
+.bottomBand {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 6rem;
+  background: linear-gradient(to top, #e3bfa4, #edcbb2);
+  border-radius: 0.4rem;
+  z-index: 1;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
+}
+
+/* --- Capa 4.5: Papel blanco encima de la banda --- */
+.paperStrip {
+  position: absolute;
+  bottom: 2%; /* ajusta según el alto del sello */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  height: 70px;
+  background: #fffaf6;
+  z-index: 2;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+
+/* --- Capa 5: Sello de cera --- */
+.waxSeal {
+  position: absolute;
+  bottom: 1.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3.3rem;
+  height: 3.3rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #d9957b, #a56550 80%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Playfair Display", serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0rem;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+  z-index: 4;
+
+  /* relieve del sello */
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+    0 4px 6px rgba(0, 0, 0, 0.25);
 }

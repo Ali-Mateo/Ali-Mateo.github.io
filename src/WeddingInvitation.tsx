@@ -20,7 +20,6 @@ import wine from "./icons/cheers.png";
 import tray from "./icons/tray.png";
 
 import papelTexture from "./photos/papel.png";
-import invitacion from "./photos/Invitacion1.png";
 import qrExample from "./photos/QRlol.png"; // ejemplo QR//
 
 /* =====================
@@ -310,18 +309,52 @@ const WeddingInvitation: React.FC = () => {
           <a href="#mesas">Mesas</a>
         </nav>
 
-        {/* INVITACIÓN (antes de la reorg solicitada) */}
-        <section
-          id="invitacion"
-          className={`${styles.fullBleed} ${styles.inviteStack} ${styles.reveal}`}
-          aria-label="Invitación digital"
-        >
-          <img
-            className={styles.inviteImgShadow}
-            src={invitacion}
-            alt="Invitación de boda"
-            loading="eager"
-          />
+        <section id="invitacion" className={styles.inviteSection}>
+          <div className={styles.envelopeContainer}>
+            <div className={styles.envelope}>
+              <div className={styles.envelopeBody}></div>
+              <div className={styles.foldLeft}></div>
+              <div className={styles.foldRight}></div>
+              <div className={styles.envelopeBottom}></div>
+              <div className={styles.envelopeTop}></div>
+            </div>
+
+            {/* Tarjeta principal */}
+            <div className={styles.inviteCard}>
+              <p className={styles.inviteIntro}>
+                Nos complace invitarte a celebrar nuestra unión
+              </p>
+              <h2 className={styles.inviteNames}>
+                Mateo Ordóñez <span>&</span> Alisson Torres
+              </h2>
+              <p className={styles.inviteDetails}>
+                Sábado, 7 de febrero de 2026 <br />
+                <strong>Quinta Los Corteza</strong> <br />a las 12:00 p.m.
+              </p>
+            </div>
+
+            {/* Tarjeta oval */}
+            <div className={styles.ovalCard}>
+              <p>
+                Bendecidos
+                <br />
+                en este
+                <br />
+                nuevo
+                <br />
+                camino
+              </p>
+            </div>
+
+            {/* Banda y sello */}
+            <div className={styles.bottomBand}></div>
+            <div className={styles.paperStrip}></div>
+            <div className={styles.waxSealWrapper}>
+              <div className={styles.waxSeal}>
+                <span>MyA</span>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* CONTADOR */}
