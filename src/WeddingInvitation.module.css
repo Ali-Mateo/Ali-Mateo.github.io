@@ -706,7 +706,56 @@
 .accountRow {
   display: flex;
   justify-content: space-between; /* 👈 separa texto a la izq y QR a la der */
-  align-items: flex-start;        /* 👈 alineados arriba */
-  flex-wrap: wrap;                /* 👈 en pantallas pequeñas se apilan */
+  align-items: flex-start; /* 👈 alineados arriba */
+  flex-wrap: wrap; /* 👈 en pantallas pequeñas se apilan */
 }
 
+/* =========================
+   Itinerario (cuadrícula 2x2 elegante)
+   ========================= */
+.itineraryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  justify-items: center;
+  align-items: center;
+  max-width: 100%;
+}
+
+.itineraryItem {
+  background: #fff;
+  border-radius: 15px;
+  text-align: center;
+  align-items: center;
+  justify-items: center;
+  border: 1px solid color-mix(in srgb, var(--rose-gold) 25%, transparent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  aspect-ratio: 1 / 1;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+
+.itineraryItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.itineraryIcon {
+  width: 2.4rem;
+  height: 2.4rem;
+  color: var(--rose-gold);
+  margin-bottom: 0.6rem;
+}
+
+.itineraryItem p {
+  margin: 0;
+  font-family: var(--font-serif-aux);
+  font-weight: 500;
+  font-size: clamp(0.95rem, 0.85rem + 0.3vw, 1.1rem);
+  color: var(--ink);
+  line-height: 1.35;
+}

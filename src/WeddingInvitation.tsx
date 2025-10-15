@@ -12,6 +12,7 @@ import abrazoTierno from "./photos/AbrazoTierno.jpg"; // VERTICAL
 import papelTexture from "./photos/papel.png";
 import invitacion from "./photos/Invitacion1.png";
 import qrExample from "./photos/QRlol.png"; // ejemplo QR//
+import { Wine, Church, UtensilsCrossed, DoorOpen } from "lucide-react";
 
 /* =====================
    Datos de la boda
@@ -98,46 +99,6 @@ const TimeBox: React.FC<{ label: string; value: number }> = ({
   </div>
 );
 
-const Icon: React.FC<{ name: "welcome" | "ring" | "toast" | "dinner" }> = ({
-  name,
-}) => {
-  const common = {
-    width: 20,
-    height: 20,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    strokeWidth: 1.5,
-  } as const;
-  switch (name) {
-    case "welcome":
-      return (
-        <svg {...common} aria-hidden="true" className={styles.rgStroke}>
-          <path d="M4 10h16M6 10V6h12v4m-3 4v6m-6-6v6" />
-        </svg>
-      );
-    case "ring":
-      return (
-        <svg {...common} aria-hidden="true" className={styles.rgStroke}>
-          <circle cx="12" cy="14" r="6" />
-          <path d="M10 5l2-2 2 2" />
-        </svg>
-      );
-    case "toast":
-      return (
-        <svg {...common} aria-hidden="true" className={styles.rgStroke}>
-          <path d="M7 8l5 2 5-2M12 10v8" />
-          <path d="M7 8v4a5 5 0 0010 0V8" />
-        </svg>
-      );
-    default:
-      return (
-        <svg {...common} aria-hidden="true" className={styles.rgStroke}>
-          <path d="M4 6h16M6 6v10a4 4 0 004 4h4a4 4 0 004-4V6" />
-        </svg>
-      );
-  }
-};
-
 /* Carrusel tipo cinta transbordadora (scroll continuo, sin saltos) */
 const Carousel: React.FC<{
   items: { src: string; alt: string; caption?: string }[];
@@ -184,7 +145,7 @@ const ScrollImage: React.FC<{ src: string; alt?: string; ratio?: string }> = ({
   ratio = "21/9",
 }) => {
   const sectionRef = useRef<HTMLDivElement | null>(null);
-  const [progress,] = useState(0);
+  const [progress] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -399,32 +360,29 @@ const WeddingInvitation: React.FC = () => {
           aria-label="Itinerario de la boda"
         >
           <h2 className={styles.sectionTitle}>Itinerario</h2>
-          <ul className={styles.timeline}>
-            <li
-              className={`${styles.timelineStep} ${styles.reveal}`}
-              data-anim="left"
-            >
-              <Icon name="welcome" /> <time>12:00</time> Recepción & bienvenida
-            </li>
-            <li
-              className={`${styles.timelineStep} ${styles.reveal}`}
-              data-anim="left"
-            >
-              <Icon name="ring" /> <time>12:30</time> Ceremonia
-            </li>
-            <li
-              className={`${styles.timelineStep} ${styles.reveal}`}
-              data-anim="left"
-            >
-              <Icon name="toast" /> <time>13:30</time> Brindis & fotos
-            </li>
-            <li
-              className={`${styles.timelineStep} ${styles.reveal}`}
-              data-anim="left"
-            >
-              <Icon name="dinner" /> <time>14:00</time> Banquete & celebración
-            </li>
-          </ul>
+
+          <div className={styles.itineraryGrid}>
+            <div className={styles.itineraryItem}>
+              <DoorOpen className={styles.itineraryIcon} strokeWidth={1.4} />
+              <p>12:00 · Recepción & Bienvenida</p>
+            </div>
+
+            <div className={styles.itineraryItem}>
+              <Church className={styles.itineraryIcon} strokeWidth={1.4} />
+              <p>12:30 · Ceremonia</p>
+            </div>
+
+            <div className={styles.itineraryItem}>
+              <Wine className={styles.itineraryIcon} strokeWidth={1.4} />
+              <p>13:30 · Brindis & Fotos</p>
+            </div>
+
+            <div className={styles.itineraryItem}>
+              <UtensilsCrossed className={styles.itineraryIcon} strokeWidth={1.4} />
+              <p>14:00 · Banquete & Celebración</p>
+            </div>
+          </div>
+
           <p className={styles.tinyHint}>*Horarios referenciales</p>
         </section>
 
@@ -578,6 +536,37 @@ const WeddingInvitation: React.FC = () => {
             *Puedes escanear el QR o copiar los datos para tu transferencia.
           </p>
         </section>
+
+        {/* Ubicación */}
+      <section
+        id="mapa"
+        className={`${styles.card} ${styles.reveal}`}
+        aria-label="Mapa de ubicación"
+      >
+        <h2 className={styles.sectionTitle}>Ubicación</h2>
+        <p className={styles.place}>{VENUE}</p>
+        <div className={styles.mapEmbed}>
+          <iframe
+            title="Mapa de la ubicación"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            src={`https://www.google.com/maps?q=${encodeURIComponent(
+              VENUE
+            )}&output=embed`}
+            allowFullScreen
+          />
+        </div>
+        <a
+          className={`${styles.btn} ${styles.rg}`}
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+            VENUE
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Abrir en Google Maps
+        </a>
+      </section>
 
         {/* 12. Ubica tu mesa */}
         <section
