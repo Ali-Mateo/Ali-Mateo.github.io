@@ -202,7 +202,7 @@
   font-weight: 600;
   font-size: clamp(1.1rem, 0.9rem + 0.6vw, 1.35rem);
   text-align: center;
-  margin: 1.2rem 0 0.8rem;
+  margin: 2rem auto;
 }
 .scriptSubtle {
   font-family: var(--font-script);
@@ -684,7 +684,7 @@
   border-radius: 15px;
   text-align: center;
   align-items: center;
-  justify-items: center;
+  justify-content: center;
   border: 1px solid color-mix(in srgb, var(--rose-gold) 25%, transparent);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -693,8 +693,25 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  padding: 1rem;
 }
 
+.itineraryTime {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: var(--rose-gold);
+  font-size: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.itineraryText {
+  margin: 0.3rem 0 0;
+  font-family: var(--font-serif-aux);
+  font-weight: 500;
+  font-size: clamp(0.95rem, 0.85rem + 0.3vw, 1.1rem);
+  color: var(--ink);
+  line-height: 1.35;
+}
 
 .itineraryItem:hover {
   transform: translateY(-3px);
@@ -899,4 +916,18 @@
 
 section{
   margin: 5rem auto;
+}
+
+.itineraryIconImg {
+  width: auto;
+  height: 3rem;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.itineraryIconImg:hover {
+  transform: scale(1.08);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
 }

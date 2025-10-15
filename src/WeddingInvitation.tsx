@@ -4,20 +4,24 @@ import styles from "./WeddingInvitation.module.css";
 /* ==== Imports de imágenes desde src/photos ==== */
 import heroImg from "./photos/TomadosDeLaManoAnillo.jpg";
 import inviteImg from "./photos/SillasFoto1.jpg"; // HORIZONTAL
-import juntosAbrazo from "./photos/JuntosAbrazo.jpg"; 
-import mostrandoAnillo from "./photos/MostrandoAnillo.jpg"; 
-import arrodillado from "./photos/ArrodilladoDandoAnillo.jpg"; 
-import poniendo from "./photos/PoniendoElAnillo.jpg"; 
-import abrazoTierno from "./photos/AbrazoTierno.jpg"; 
-import abrazoAire from "./photos/abrazoAire.jpg"; 
-import abrazoAlegre from "./photos/abrazoAlegre.jpeg"; 
-import manosAnillo from "./photos/manosAnillo.jpg"; 
-import mesas from "./photos/mesas.jpeg"; 
+import juntosAbrazo from "./photos/JuntosAbrazo.jpg";
+import mostrandoAnillo from "./photos/MostrandoAnillo.jpg";
+import arrodillado from "./photos/ArrodilladoDandoAnillo.jpg";
+import poniendo from "./photos/PoniendoElAnillo.jpg";
+import abrazoTierno from "./photos/AbrazoTierno.jpg";
+import abrazoAire from "./photos/abrazoAire.jpg";
+import abrazoAlegre from "./photos/abrazoAlegre.jpeg";
+import manosAnillo from "./photos/manosAnillo.jpg";
+import mesas from "./photos/mesas.jpeg";
+
+import chandelier from "./icons/chandelier.png";
+import church from "./icons/church.png";
+import wine from "./icons/cheers.png";
+import tray from "./icons/tray.png";
 
 import papelTexture from "./photos/papel.png";
 import invitacion from "./photos/Invitacion1.png";
 import qrExample from "./photos/QRlol.png"; // ejemplo QR//
-import { Wine, Church, UtensilsCrossed, DoorOpen } from "lucide-react";
 
 /* =====================
    Datos de la boda
@@ -429,26 +433,43 @@ const WeddingInvitation: React.FC = () => {
 
           <div className={styles.itineraryGrid}>
             <div className={styles.itineraryItem}>
-              <DoorOpen className={styles.itineraryIcon} strokeWidth={1.4} />
-              <p>12:00 · Recepción & Bienvenida</p>
-            </div>
-
-            <div className={styles.itineraryItem}>
-              <Church className={styles.itineraryIcon} strokeWidth={1.4} />
-              <p>12:30 · Ceremonia</p>
-            </div>
-
-            <div className={styles.itineraryItem}>
-              <Wine className={styles.itineraryIcon} strokeWidth={1.4} />
-              <p>13:30 · Brindis & Fotos</p>
-            </div>
-
-            <div className={styles.itineraryItem}>
-              <UtensilsCrossed
-                className={styles.itineraryIcon}
-                strokeWidth={1.4}
+              <img
+                src={chandelier}
+                alt="Recepción"
+                className={styles.itineraryIconImg}
               />
-              <p>14:00 · Banquete & Celebración</p>
+              <span className={styles.itineraryTime}>12:00</span>
+              <p className={styles.itineraryText}>Recepción & Bienvenida</p>
+            </div>
+
+            <div className={styles.itineraryItem}>
+              <img
+                src={church}
+                alt="Ceremonia"
+                className={styles.itineraryIconImg}
+              />
+              <span className={styles.itineraryTime}>12:30</span>
+              <p className={styles.itineraryText}>Ceremonia</p>
+            </div>
+
+            <div className={styles.itineraryItem}>
+              <img
+                src={wine}
+                alt="Brindis y Fotos"
+                className={styles.itineraryIconImg}
+              />
+              <span className={styles.itineraryTime}>13:30</span>
+              <p className={styles.itineraryText}>Brindis & Fotos</p>
+            </div>
+
+            <div className={styles.itineraryItem}>
+              <img
+                src={tray}
+                alt="Banquete"
+                className={styles.itineraryIconImg}
+              />
+              <span className={styles.itineraryTime}>14:00</span>
+              <p className={styles.itineraryText}>Banquete & Celebración</p>
             </div>
           </div>
 
