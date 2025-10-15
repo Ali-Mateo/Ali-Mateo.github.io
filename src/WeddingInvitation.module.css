@@ -232,6 +232,7 @@
   position: relative;
   overflow: hidden;
   contain: content;
+  margin-bottom: 5rem;
 }
 .carMarquee {
   display: flex;
@@ -580,7 +581,7 @@
    Imagen sin bordes con parallax (ScrollImage)
    ========================= */
 .scrollImgSection {
-  margin-top: 2.5rem;
+  margin-top: 4rem;
   width: 100dvw;
   margin-left: calc(50% - 50dvw);
   margin-right: calc(50% - 50dvw);

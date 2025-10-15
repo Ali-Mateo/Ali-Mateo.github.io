@@ -4,11 +4,16 @@ import styles from "./WeddingInvitation.module.css";
 /* ==== Imports de imágenes desde src/photos ==== */
 import heroImg from "./photos/TomadosDeLaManoAnillo.jpg";
 import inviteImg from "./photos/SillasFoto1.jpg"; // HORIZONTAL
-import juntosAbrazo from "./photos/JuntosAbrazo.jpg"; // VERTICAL
-import mostrandoAnillo from "./photos/MostrandoAnillo.jpg"; // VERTICAL
-import arrodillado from "./photos/ArrodilladoDandoAnillo.jpg"; // VERTICAL
-import poniendo from "./photos/PoniendoElAnillo.jpg"; // VERTICAL
-import abrazoTierno from "./photos/AbrazoTierno.jpg"; // VERTICAL
+import juntosAbrazo from "./photos/JuntosAbrazo.jpg"; 
+import mostrandoAnillo from "./photos/MostrandoAnillo.jpg"; 
+import arrodillado from "./photos/ArrodilladoDandoAnillo.jpg"; 
+import poniendo from "./photos/PoniendoElAnillo.jpg"; 
+import abrazoTierno from "./photos/AbrazoTierno.jpg"; 
+import abrazoAire from "./photos/abrazoAire.jpg"; 
+import abrazoAlegre from "./photos/abrazoAlegre.jpeg"; 
+import manosAnillo from "./photos/manosAnillo.jpg"; 
+import mesas from "./photos/mesas.jpeg"; 
+
 import papelTexture from "./photos/papel.png";
 import invitacion from "./photos/Invitacion1.png";
 import qrExample from "./photos/QRlol.png"; // ejemplo QR//
@@ -359,9 +364,14 @@ const WeddingInvitation: React.FC = () => {
                 caption: "Juntos, siempre.",
               },
               {
-                src: mostrandoAnillo,
-                alt: "Mostrando el anillo",
+                src: abrazoAire,
+                alt: "Abrazo en el aire",
                 caption: "Para toda la vida.",
+              },
+              {
+                src: heroImg,
+                alt: "Tomados de la mano",
+                caption: "Nos convertimos en 1.",
               },
               {
                 src: arrodillado,
@@ -406,7 +416,7 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* 3. Imagen sin bordes con efecto al hacer scroll */}
-        <ScrollImage src={heroImg} alt="Detalle del anillo" ratio="21/9" />
+        <ScrollImage src={abrazoTierno} alt="Detalle del anillo" ratio="21/9" />
 
         {/* 4. Itinerario */}
         <section
@@ -446,7 +456,7 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* 5. Imagen como la 3 */}
-        <ScrollImage src={poniendo} alt="Manos y anillo" ratio="21/9" />
+        <ScrollImage src={manosAnillo} alt="Manos y anillo" ratio="21/9" />
 
         {/* 6. #pases */}
         <section
@@ -497,7 +507,7 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* 7. Imagen */}
-        <ScrollImage src={arrodillado} alt="El gran momento" ratio="21/9" />
+        <ScrollImage src={abrazoAlegre} alt="El gran momento" ratio="21/9" />
 
         {/* 8. Confirmar asistencia */}
         <section
@@ -541,9 +551,8 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* 9. Imagen */}
-        <ScrollImage src={abrazoTierno} alt="Abrazo tierno" ratio="21/9" />
+        <ScrollImage src={poniendo} alt="Abrazo tierno" ratio="21/9" />
 
-        {/* 10. Detalles de regalo */}
         {/* 10. Detalles de regalo */}
         <section
           id="cuenta"
@@ -596,7 +605,10 @@ const WeddingInvitation: React.FC = () => {
           </p>
         </section>
 
-        {/* Ubicación */}
+        {/* 10. Imagen */}
+        <ScrollImage src={mesas} alt="Abrazo tierno" ratio="21/9" />
+
+        {/* 11. Ubicación */}
         <section
           id="mapa"
           className={`${styles.card} ${styles.reveal}`}
@@ -647,7 +659,7 @@ const WeddingInvitation: React.FC = () => {
           </div>
         </section>
 
-        {/* 14. Footer */}
+        {/* 12. Footer */}
         <footer
           className={`${styles.footer} ${styles.reveal}`}
           aria-label="Cierre"
