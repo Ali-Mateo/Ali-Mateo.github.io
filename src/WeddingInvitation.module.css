@@ -226,7 +226,7 @@
   display: flex;
   gap: 0.8rem;
   width: max-content;
-  animation: marquee var(--marquee-duration, 70s) linear infinite;
+  animation: marquee var(--marquee-duration, 20s) linear infinite;
   will-change: transform;
   animation-play-state: var(--marquee-state, running);
 }
@@ -289,16 +289,6 @@
   }
   to {
     transform: translateX(-50%);
-  }
-}
-
-/* Desactiva interacción del carrusel SOLO en móvil */
-@media (max-width: 768px) {
-  .carousel,
-  .carousel * {
-    pointer-events: none;
-    touch-action: none;
-    user-select: none;
   }
 }
 
