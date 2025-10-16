@@ -1,5 +1,5 @@
 /* =========================
-   WeddingInvitation.module.css (minimal + paper under invite + belt carousel)
+   WeddingInvitation.module.css (limpio)
    ========================= */
 
 /* Fonts */
@@ -9,10 +9,10 @@
    Tokens / palette
 ------------------------- */
 :root {
-  --rose-gold: #b76e79; /* acento rose gold */
-  --gold: #c9a14a; /* dorado */
-  --blush: #f5e1de; /* palo rosa */
-  --blush-2: #f9e8ee; /* palo rosa claro */
+  --rose-gold: #b76e79;
+  --gold: #c9a14a;
+  --blush: #f5e1de;
+  --blush-2: #f9e8ee;
   --ink: #2b2b2b;
   --muted: #6d6d6d;
   --surface: #ffffff;
@@ -43,7 +43,7 @@
 :global(html),
 :global(body) {
   width: 100%;
-  max-width: 100dvw;
+  max-width: 100vw;
   margin: 0;
   overflow-x: hidden;
   box-sizing: border-box;
@@ -58,7 +58,7 @@
   font-family: var(--font-serif-aux);
   background: radial-gradient(75dvw 37.5dvw at 10% -10%, #fff 0, #fff0 60%),
     radial-gradient(75dvw 37.5dvw at 90% 110%, #fff 0, #fff0 60%),
-    linear-gradient(180deg, #fff 0%, #f7f1f2 100%), var(--paper-tex); /* 👈 textura de papel */
+    linear-gradient(180deg, #fff 0%, #f7f1f2 100%), var(--paper-tex);
   background-repeat: no-repeat, no-repeat, no-repeat, repeat;
   background-size: auto, auto, auto, var(--paper-size);
   background-position: center top, center bottom, center, 0 0;
@@ -80,11 +80,11 @@
       rgba(255, 255, 255, 0.86) 40%,
       var(--blush-2) 100%
     ),
-    red;
+    var(--paper-tex);
   background-repeat: no-repeat, repeat;
   background-size: cover, var(--paper-size);
   background-position: center, 0 0;
-  border: 1px solid color-mix(in srgb, var(--gold) 18%, #0000);
+  border: 1px solid color-mix(in srgb, var(--gold) 18%, transparent);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.05);
   border-radius: 0.9rem;
   padding: clamp(1rem, 2.5vw, 1.4rem);
@@ -94,8 +94,8 @@
    Root container
 ------------------------- */
 .invRoot {
-  max-width: min(120rem, 97dvw);
-  padding-inline: max(3dvw, env(safe-area-inset-left))
+  max-width: min(120rem, 100vw);
+  padding-inline: max(0dvw, env(safe-area-inset-left))
     max(1rem, env(safe-area-inset-right));
 }
 
@@ -104,9 +104,7 @@
 ------------------------- */
 .stickyNav {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  inset: 0 0 auto 0;
   z-index: 100;
   display: flex;
   flex-wrap: wrap;
@@ -120,12 +118,10 @@
   opacity: 0;
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
-
 .navVisible {
   transform: translateY(0);
   opacity: 1;
 }
-
 .navHidden {
   transform: translateY(-100%);
   opacity: 0;
@@ -145,56 +141,49 @@
 }
 
 /* -------------------------
-   Invitación: papel debajo + PNG con sombra de silueta
+   Invitación: papel + PNG
 ------------------------- */
 .fullBleed {
   width: 100dvw;
   margin-left: calc(50% - 50dvw);
   margin-right: calc(50% - 50dvw);
 }
-/* Invitación: papel repetido a pantalla completa + PNG centrada */
 .inviteStack {
   min-height: calc(80dvh - var(--count-h));
   display: grid;
   place-items: center;
   padding: 0;
-
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
 }
-
 .paperImg {
   grid-area: 1/1;
   width: min(80vw, 800px);
-  height: auto;
   object-fit: contain;
-  /* realce sutil del papel */
   filter: saturate(0.95) contrast(1.02);
   opacity: 0.96;
 }
 .inviteImgShadow {
   grid-area: 1/1;
   width: min(80vw, 1000px);
-  height: auto;
   object-fit: contain;
-  position: relative; /* 👈 Necesario para posicionar el ::after */
-  z-index: 1; /* que quede encima de la sombra */
+  position: relative;
+  z-index: 1;
 }
-
 .inviteImgShadow::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3); /* color de la sombra */
-  filter: blur(20px); /* desenfoque gaussiano */
-  z-index: -1; /* detrás de la imagen */
-  transform: translateY(15px); /* desplazar sombra hacia abajo */
-  border-radius: 1rem; /* opcional: suaviza bordes */
+  background: rgba(0, 0, 0, 0.3);
+  filter: blur(20px);
+  z-index: -1;
+  transform: translateY(15px);
+  border-radius: 1rem;
 }
 
 /* -------------------------
-   Títulos / tipografía / utilidades
+   Títulos / tipografía
 ------------------------- */
 .sectionTitle {
   font-family: var(--font-serif);
@@ -214,7 +203,7 @@
   color: var(--muted);
 }
 
-/* Card neutral (sin bordes, padding ni sombras) */
+/* Card neutral */
 .card {
   background: transparent;
   border: none;
@@ -225,31 +214,32 @@
 }
 
 /* -------------------------
-   Carrusel "cinta transbordadora"
+   Carrusel “cinta”
 ------------------------- */
 .carousel {
   position: relative;
   overflow: hidden;
-  contain: content;
+  contain: layout paint; /* ↓ evita reflows/jitter */
   margin-bottom: 5rem;
 }
 .carMarquee {
   display: flex;
   gap: 0.8rem;
   width: max-content;
-  /* una vuelta completa (trasladar el 50% porque duplicamos los ítems) */
-  animation: marquee var(--marquee-duration, 45s) linear infinite;
+  animation: marquee var(--marquee-duration, 70s) linear infinite;
+  will-change: transform;
+  animation-play-state: var(--marquee-state, running);
 }
 .carousel:hover .carMarquee {
   animation-play-state: paused;
 }
+
 @media (prefers-reduced-motion: reduce) {
   .carMarquee {
     animation: none;
   }
 }
 
-/* Slides (mismo tamaño en ambas mitades para loop perfecto) */
 .carSlide {
   flex: 0 0 min(82vw, 28rem);
   max-width: min(82vw, 28rem);
@@ -276,7 +266,12 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+  pointer-events: none; /* ↓ no “pinchar/arrastrar” sobre img */
+  user-select: none;
+  -webkit-user-drag: none;
 }
+
 .carCaption {
   position: absolute;
   inset: auto 0 0 0;
@@ -287,13 +282,23 @@
   font-size: clamp(0.9rem, 0.85rem + 0.25vw, 1rem);
 }
 
-/* Animación del loop (dos mitades idénticas → trasladamos -50%) */
+/* Loop perfecto (duplicas items → trasladas -50%) */
 @keyframes marquee {
   from {
     transform: translateX(0);
   }
   to {
     transform: translateX(-50%);
+  }
+}
+
+/* Desactiva interacción del carrusel SOLO en móvil */
+@media (max-width: 768px) {
+  .carousel,
+  .carousel * {
+    pointer-events: none;
+    touch-action: none;
+    user-select: none;
   }
 }
 
@@ -315,6 +320,7 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
 .photoPanel {
   position: relative;
   border-radius: 0.9rem;
@@ -403,7 +409,7 @@
   width: 100%;
   padding: 0.65rem 0.8rem;
   border-radius: 0.6rem;
-  border: 1px solid color-mix(in srgb, var(--rose-gold) 35%, #0000);
+  border: 1px solid color-mix(in srgb, var(--rose-gold) 35%, transparent);
   background: #fff;
   font: inherit;
   margin: 0.3rem 0;
@@ -441,38 +447,6 @@
 }
 .okMsg {
   color: #137a25;
-}
-
-.accountRow {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  margin-top: 0.6rem;
-}
-.account {
-  display: inline-block;
-  padding: 0.4rem 0.6rem;
-  border-radius: 0.4rem;
-  background: #fff;
-  border: 1px solid color-mix(in srgb, var(--gold) 30%, #0000);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", monospace;
-  font-size: 0.95em;
-  word-break: break-word;
-}
-
-/* a11y */
-.srOnly {
-  position: absolute !important;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 /* -------------------------
@@ -571,103 +545,46 @@
 .pageTile {
   width: 100%;
   min-height: 100dvh;
-  background-repeat: repeat; /* 👈 patrón repetido */
+  background-repeat: repeat;
   background-position: 0 0;
-  background-size: 420px; /* ajusta el tamaño del mosaico a gusto */
+  background-size: 420px;
 }
 
 /* =========================
-   Imagen sin bordes con parallax (ScrollImage)
+   Imagen a pantalla completa (vertical)
+   (anima al entrar en vista con .reveal/.inView)
    ========================= */
 .scrollImgSection {
-  margin-top: 4rem;
-  width: 100dvw;
+  width: 100vw;
+  height: 100dvh;
   margin-left: calc(50% - 50dvw);
   margin-right: calc(50% - 50dvw);
-  height: 100dvh; /* 👈 más scroll = más "recorrido" */
   position: relative;
-}
-
-.scrollImgFigure {
-  margin: 0;
-  width: 100%;
-  height: 100dvh;
-  position: sticky;
-  top: 0;
   overflow: hidden;
 }
-
-.scrollImg {
+.scrollImgFigure {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+.scrollImgStatic {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(var(--parScale, 1)) translateY(var(--parY, 0));
-  will-change: transform;
-  transition: transform 0.2s ease-out; /* 👈 suaviza en móvil */
+  transform: scale(1.05);
+  opacity: 0;
+  transition: transform 1.2s ease-out, opacity 1.6s ease-out;
+  will-change: transform, opacity;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .scrollImg {
-    transform: none !important;
-    transition: none !important;
-  }
-}
-
-/* (opcional) lista simple de padres si quieres un estilo específico */
-.parents {
-  list-style: none;
-  padding: 0;
-  margin: 0.5rem auto 0;
-  max-width: 40rem;
-  text-align: center;
-}
-.parents li {
-  margin: 0.35rem 0;
-  color: var(--ink);
-}
-.parents span {
-  color: var(--muted);
-  font-size: 0.95em;
-}
-
-.mapBtn {
-  margin-top: 2rem;
-}
-
-.accountBox {
-  flex: 1;
-  max-width: max-content;
-  font-family: var(--font-serif-aux);
-  font-size: 0.95rem;
-  line-height: 0.5;
-  /* align-items y gap no hacen nada aquí, puedes quitarlos si quieres */
-}
-
-.qrBox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.2rem;
-  border-radius: 0.8rem;
-  background: #fff;
-  border: 1px solid color-mix(in srgb, var(--rose-gold) 30%, #0000);
-}
-
-.qrImg {
-  max-width: 120px;
-  height: auto;
-  display: block;
-}
-
-.accountRow {
-  display: flex;
-  justify-content: space-between; /* 👈 separa texto a la izq y QR a la der */
-  align-items: flex-start; /* 👈 alineados arriba */
-  flex-wrap: wrap; /* 👈 en pantallas pequeñas se apilan */
+/* cuando el contenedor recibe .inView desde IntersectionObserver */
+.inView .scrollImgStatic {
+  transform: scale(1);
+  opacity: 1;
 }
 
 /* =========================
-   Itinerario (cuadrícula 2x2 elegante)
+   Itinerario (cuadrícula 2x2)
    ========================= */
 .itineraryGrid {
   display: grid;
@@ -677,13 +594,10 @@
   align-items: center;
   max-width: 100%;
 }
-
 .itineraryItem {
   background: #fff;
   border-radius: 15px;
   text-align: center;
-  align-items: center;
-  justify-content: center;
   border: 1px solid color-mix(in srgb, var(--rose-gold) 25%, transparent);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -694,7 +608,22 @@
   justify-content: center;
   padding: 1rem;
 }
-
+.itineraryItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+.itineraryIconImg {
+  width: auto;
+  height: 3rem;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+.itineraryIconImg:hover {
+  transform: scale(1.08);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+}
 .itineraryTime {
   font-family: var(--font-serif);
   font-weight: 700;
@@ -702,8 +631,8 @@
   font-size: 1.2rem;
   margin-top: 0.5rem;
 }
-
-.itineraryText {
+.itineraryText,
+.itineraryItem p {
   margin: 0.3rem 0 0;
   font-family: var(--font-serif-aux);
   font-weight: 500;
@@ -712,28 +641,7 @@
   line-height: 1.35;
 }
 
-.itineraryItem:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-}
-
-.itineraryIcon {
-  width: 2.4rem;
-  height: 2.4rem;
-  color: var(--rose-gold);
-  margin-bottom: 0.6rem;
-}
-
-.itineraryItem p {
-  margin: 0;
-  font-family: var(--font-serif-aux);
-  font-weight: 500;
-  font-size: clamp(0.95rem, 0.85rem + 0.3vw, 1.1rem);
-  color: var(--ink);
-  line-height: 1.35;
-}
-
-/* ========== Cover hero (portada) con capa media negra ========== */
+/* ========== Cover hero con capa media negra ========== */
 .coverHero {
   width: 100dvw;
   height: 100vh;
@@ -752,23 +660,14 @@
   will-change: transform, opacity;
   z-index: 5;
 }
-
-/* Capa media negra semitransparente (entre fondo y máscara/degradado) */
 .coverHero::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(
-    0,
-    0,
-    0,
-    0.58
-  ); /* <-- ajusta la opacidad aquí (0.2 - 0.6 típico) */
+  background: rgba(0, 0, 0, 0.3);
   z-index: 1;
   pointer-events: none;
 }
-
-/* Máscara/degradado para dar contraste extra (ahora encima de la capa negra) */
 .coverHero::before {
   content: "";
   position: absolute;
@@ -782,17 +681,15 @@
   pointer-events: none;
   z-index: 2;
 }
-
 .coverOverlay {
   position: relative;
-  z-index: 3; /* contenido encima de la capa negra y la máscara */
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
   text-align: center;
 }
-
 .coverTitle {
   font-family: var(--font-script);
   color: #fff;
@@ -800,10 +697,7 @@
   font-size: clamp(2.2rem, 7vw, 5rem);
   margin: 0;
   letter-spacing: 0.02em;
-  transform: translateY(0);
 }
-
-/* Reduce movimiento si el usuario lo prefiere */
 @media (prefers-reduced-motion: reduce) {
   .coverHero {
     transition: none;
@@ -813,37 +707,33 @@
 }
 
 /* =========================
-   Contador refinado para fondo claro
+   Contador
    ========================= */
-
 .countdown {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 2.4rem; /* más espacio entre columnas */
+  gap: 2.4rem;
   flex-wrap: wrap;
 }
-
 .timeBox {
   text-align: center;
   background: transparent;
   min-width: 4.5rem;
 }
-
 .timeBox span {
   font-family: "Playfair Display", serif;
   font-weight: 700;
   font-size: clamp(1.8rem, 4vw, 2.6rem);
-  color: #333; /* más contraste */
+  color: #333;
   letter-spacing: 0.02em;
   display: block;
 }
-
 .timeBox small {
   display: block;
   font-family: "Manrope", sans-serif;
   font-size: 0.75rem;
-  color: #a97d6c; /* rose gold más cálido */
+  color: #a97d6c;
   letter-spacing: 0.15em;
   margin-top: 0.4rem;
   text-transform: uppercase;
@@ -851,20 +741,17 @@
 .timeBox + .timeBox {
   position: relative;
 }
-
 .timeBox + .timeBox::before {
   content: ":";
   position: absolute;
-  left: -1.2rem; /* mueve el ":" a la izquierda del bloque siguiente */
-  top: 50%; /* centrado vertical */
+  left: -1.2rem;
+  top: 50%;
   transform: translateY(-50%);
-  color: #c68a70; /* tono rose gold */
+  color: #c68a70;
   font-size: 2rem;
   font-weight: 600;
   line-height: 1;
 }
-
-/* --- Círculo principal más limpio --- */
 .countCircle {
   position: relative;
   width: 9rem;
@@ -880,26 +767,20 @@
   text-align: center;
   margin: 0 auto 2rem auto;
 }
-
 .countCircle > div {
   transform: translateY(-0.15rem);
-}
-
-.countCircle > div {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-
 .countCircle span {
   font-family: "Playfair Display", serif;
   font-weight: 700;
   font-size: 3.2rem;
-  color: #a05b4b; /* Rose gold oscuro */
+  color: #a05b4b;
   line-height: 1;
 }
-
 .countCircle small {
   font-family: "Manrope", sans-serif;
   font-size: 0.85rem;
@@ -908,11 +789,9 @@
   color: #b07a6b;
   margin-top: 0.3rem;
 }
-
 .countStrip {
   margin: 5rem auto;
 }
-
 .fecha {
   text-align: center;
   font-family: var(--font-serif);
@@ -921,32 +800,19 @@
   margin-top: 1.2rem;
   color: var(--rose-gold);
 }
-
 section {
   margin: 5rem auto;
 }
 
-.itineraryIconImg {
-  width: auto;
-  height: 3rem;
-  object-fit: contain;
-  margin-bottom: 0.5rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  transition: transform 0.25s ease, filter 0.25s ease;
-}
-
-.itineraryIconImg:hover {
-  transform: scale(1.08);
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
-}
-
+/* =========================
+   Sobre + Tarjetas (entrada)
+   ========================= */
 .inviteSection {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 320px;
 }
-
 .envelopeContainer {
   height: 380px;
   position: relative;
@@ -954,7 +820,7 @@ section {
   margin: 5rem auto;
 }
 
-/* --- Capa 1: Sobre --- */
+/* Capa 1: Sobre */
 .envelope {
   position: relative;
   width: 240px;
@@ -964,8 +830,6 @@ section {
   animation: slideFromTopLeft 0.9s ease-out both;
   filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.85));
 }
-
-/* --- cuerpo del sobre --- */
 .envelopeBody {
   position: absolute;
   inset: 0;
@@ -973,9 +837,6 @@ section {
   z-index: 1;
   clip-path: polygon(0 100%, 100% 100%, 100% 25%, 50% 0, 0 25%);
 }
-
-
-/* --- solapa superior --- */
 .envelopeTop {
   position: absolute;
   top: 0;
@@ -986,8 +847,6 @@ section {
   z-index: 2;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
-
-/* --- alas laterales --- */
 .foldLeft,
 .foldRight {
   position: absolute;
@@ -996,20 +855,16 @@ section {
   height: 70%;
   z-index: 3;
 }
-
 .foldLeft {
   left: 0;
   background: linear-gradient(to right, #ddac8e, #dcb095, #eec4a9, #eec4a9);
   clip-path: polygon(0 0, 100% 50%, 100% 100%, 0 100%);
 }
-
 .foldRight {
   right: 0;
   background: linear-gradient(to right, #cd9877, #eec4a9);
   clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);
 }
-
-/* --- solapa inferior --- */
 .envelopeBottom {
   position: absolute;
   top: 70%;
@@ -1020,20 +875,20 @@ section {
   z-index: 3;
 }
 
-/* --- Capa 2: Tarjeta principal (ajustada) --- */
+/* Capa 2: Tarjeta principal */
 .inviteCard {
   position: absolute;
-  top: 25%; /* un poco más abajo */
-  left: 60%; /* centrada horizontalmente */
-  transform: translate(-50%, 0); /* corrige el desplazamiento */
-  width: 65%; /* más estrecha para móvil */
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 65%;
   background: #fffaf7;
   border-radius: 0.4rem;
   box-shadow: 0 15px 20px rgba(0, 0, 0, 0.55);
-  padding: 0.5rem 0.5rem;
+  padding: 0.5rem;
   text-align: center;
   z-index: 8;
-   animation: slideFromRight 1s ease-out ;
+  animation: slideCardIn 1s ease-out both;
 }
 
 .inviteIntro {
@@ -1043,7 +898,6 @@ section {
   margin-bottom: 0.7rem;
   line-height: 1.3;
 }
-
 .inviteNames {
   font-family: "Mea Culpa", cursive;
   color: var(--ink);
@@ -1055,28 +909,25 @@ section {
   flex-direction: column;
   align-items: center;
 }
-
 .inviteNames span {
   display: block;
-  font-family: "Mea Culpa", cursive; /* igual que los nombres */
-  font-size: 0.5em; /* ligeramente más pequeño */
-  line-height: 0.7; /* lo acerca al nombre de arriba */
+  font-family: "Mea Culpa", cursive;
+  font-size: 0.5em;
+  line-height: 0.7;
   color: var(--rose-gold);
   margin: 0.1rem 0;
 }
-
 .inviteDetails {
   color: var(--ink);
   font-size: 0.6rem;
   line-height: 1;
 }
-
 .inviteDetails strong {
   color: var(--rose-gold);
   font-size: 1rem;
 }
 
-/* --- Capa 3: Tarjeta oval --- */
+/* Capa 3: Tarjeta oval */
 .ovalCard {
   box-shadow: 0 15px 20px rgba(0, 0, 0, 0.55);
   line-height: 0.8;
@@ -1097,7 +948,7 @@ section {
   font-family: "Mea Culpa", cursive;
 }
 
-/* --- Capa 4: Banda inferior --- */
+/* Capa 4: Banda + papel + sello */
 .bottomBand {
   position: absolute;
   bottom: 0;
@@ -1110,22 +961,17 @@ section {
   z-index: 1;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
 }
-
-/* --- Capa 4.5: Papel blanco encima de la banda --- */
 .paperStrip {
-  position: absolute; /* ajusta según el alto del sello */
+  position: absolute;
   left: 50%;
   top: 15%;
   width: 80%;
   height: 70px;
   background: #fffaf6;
   z-index: 2;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.1),
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
     inset 0 1px 1px rgba(255, 255, 255, 0.6);
 }
-
-/* --- Capa 5: Sello de cera --- */
 .waxSeal {
   position: absolute;
   bottom: 1.8rem;
@@ -1142,15 +988,10 @@ section {
   font-weight: 600;
   font-size: 1rem;
   color: rgba(255, 255, 255, 0.9);
-  letter-spacing: 0rem;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
   z-index: 4;
-
-  /* relieve del sello */
-  box-shadow:
-    inset 0 2px 4px rgba(255, 255, 255, 0.4),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
-    0 4px 6px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.25);
 }
 
 /* === Animaciones de entrada === */
@@ -1164,7 +1005,6 @@ section {
     transform: translate(0, 0) rotate(0deg);
   }
 }
-
 @keyframes slideFromRight {
   from {
     opacity: 0;
@@ -1175,7 +1015,6 @@ section {
     transform: translateX(0);
   }
 }
-
 @keyframes slideFromLeft {
   from {
     opacity: 0;
@@ -1186,92 +1025,127 @@ section {
     transform: translateX(0);
   }
 }
-
-@keyframes slideFromBottom {
-  from {
-    opacity: 0;
-    transform: translateY(80px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.inviteCard {
-  position: absolute;
-  top: 25%;
-  left: 50%;
-  transform: translate(-50%, 0);
-  width: 65%;
-  background: #fffaf7;
-  border-radius: 0.4rem;
-  box-shadow: 0 15px 20px rgba(0, 0, 0, 0.55);
-  padding: 0.5rem;
-  text-align: center;
-  z-index: 8;
-  animation: slideCardIn 1s ease-out both;
-}
-
-@keyframes slideCardIn {
-  from {
-    opacity: 0;
-    transform: translate(80px, 0); /* entra desde la derecha */
-  }
-  to {
-    opacity: 1;
-    transform: translate(-30%, 0); /* posición final centrada */
-  }
-}
-
-/* === Animaciones adicionales para las capas === */
-
-/* Envelope (desde arriba a la izquierda) */
-.envelope {
-  animation: slideFromTopLeft 0.9s ease-out both;
-}
-
-/* Tarjeta principal (desde la derecha) */
-.inviteCard {
-  animation: slideCardIn 1s ease-out both;
-}
-
-/* Tarjeta oval (desde la izquierda) */
-.ovalCard {
-  animation: slideFromLeft 1s ease-out both;
-}
-
-/* Retrasos opcionales para efecto secuencial */
-.envelope { animation-delay: 0.5s; }
-.inviteCard { animation-delay: 0.8s; }
-.ovalCard { animation-delay: 1.2s; }
-
-/* --- Animación especial para la banda inferior --- */
 @keyframes slideFromBottomFixed {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(80px); /* mantiene el centrado */
+    transform: translateX(-50%) translateY(80px);
   }
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
 }
-
-/* Aplica la nueva animación */
-.bottomBand, .paperStrip, .waxSeal {
-  animation: slideFromBottomFixed 1s ease-out both;
-  animation-delay: 0.9s; /* opcional: efecto secuencial */
+@keyframes slideCardIn {
+  from {
+    opacity: 0;
+    transform: translate(80px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-30%, 0);
+  } /* efecto estilizado */
 }
 
-/* Animaciones solo al entrar en vista */
+/* Secuencia */
+.envelope {
+  animation: slideFromTopLeft 0.9s ease-out both;
+  animation-delay: 0.5s;
+}
+.inviteCard {
+  animation: slideCardIn 1s ease-out both;
+  animation-delay: 0.8s;
+}
+.ovalCard {
+  animation: slideFromLeft 1s ease-out both;
+  animation-delay: 1.2s;
+}
+.bottomBand,
+.paperStrip,
+.waxSeal {
+  animation: slideFromBottomFixed 1s ease-out both;
+  animation-delay: 0.9s;
+}
+
+/* Animaciones solo al entrar en vista (sobre) */
 .envelopeContainer * {
   opacity: 0;
   transform: translateY(30px);
   transition: transform 0.8s ease-out, opacity 0.8s ease-out;
 }
-
 .envelopeContainer.active * {
   opacity: 1;
   transform: none;
+}
+
+/* Utilidades varias */
+.pases {
+  padding: 0 2rem;
+}
+.botonMaps {
+  display: inline-block;
+  margin-top: 1rem;
+  margin-left: 2rem;
+  text-decoration: none;
+}
+.mapBtn {
+  margin-top: 2rem;
+}
+
+/* Cuenta / QR */
+.accountRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.accountBox {
+  flex: 1;
+  max-width: max-content;
+  font-family: var(--font-serif-aux);
+  font-size: 0.95rem;
+  line-height: 0.5;
+}
+.qrBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  border-radius: 0.8rem;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--rose-gold) 30%, transparent);
+}
+.qrImg {
+  max-width: 120px;
+  height: auto;
+  display: block;
+}
+
+/* a11y */
+.srOnly {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Padres */
+.parents {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem auto 0;
+  max-width: 40rem;
+  text-align: center;
+}
+.parents li {
+  margin: 0.35rem 0;
+  color: var(--ink);
+}
+.parents span {
+  color: var(--muted);
+  font-size: 0.95em;
 }

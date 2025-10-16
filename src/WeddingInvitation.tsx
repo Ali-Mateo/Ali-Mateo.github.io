@@ -137,15 +137,12 @@ function useHideOnScroll(heroHeight = window.innerHeight) {
    UI Helpers
 ===================== */
 
-/* Carrusel tipo cinta transbordadora (scroll continuo, sin saltos) */
 const Carousel: React.FC<{
   items: { src: string; alt: string; caption?: string }[];
-  /** Segundos por vuelta (más grande = más lento) */
-  speed?: number;
-}> = ({ items, speed = 45 }) => {
-  // Duplicamos ítems para loop perfecto
-  const loopItems = [...items, ...items];
+  speed?: number; // segundos por vuelta
+}> = ({ items, speed = 70 }) => {
   const [paused, setPaused] = useState(false);
+  const loopItems = [...items, ...items]; // duplicamos
 
   return (
     <div
@@ -158,12 +155,14 @@ const Carousel: React.FC<{
     >
       <div
         className={styles.carMarquee}
-        data-paused={paused ? "true" : "false"}
-        style={{ ["--marquee-duration" as any]: `${speed}s` }}
+        style={{
+          ["--marquee-duration" as any]: `${speed}s`,
+          animationPlayState: paused ? "paused" : "running",
+        }}
       >
         {loopItems.map((it, i) => (
-          <figure key={i} className={styles.carSlide} tabIndex={-1}>
-            <img src={it.src} alt={it.alt} loading="lazy" />
+          <figure key={i} className={styles.carSlide}>
+            <img src={it.src} alt={it.alt} loading="lazy" draggable={false} />
             {it.caption && (
               <figcaption className={styles.carCaption}>
                 {it.caption}
@@ -176,43 +175,43 @@ const Carousel: React.FC<{
   );
 };
 
-/** Imagen a pantalla ancha, sin bordes, con parallax al hacer scroll */
-const ScrollImage: React.FC<{ src: string; alt?: string; ratio?: string }> = ({
-  src,
-  alt,
-  ratio = "21/9",
-}) => {
-  const sectionRef = useRef<HTMLDivElement | null>(null);
-  const [progress] = useState(0);
+interface ScrollImageProps {
+  src: string;
+  alt?: string;
+}
+
+const ScrollImage: React.FC<ScrollImageProps> = ({ src, alt }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const total = rect.height - vh;
-      const scrolled = Math.min(Math.max((0 - rect.top) / total, 0), 1);
-      const scale = 1 + scrolled * 0.2;
-      sectionRef.current
-        .querySelector("img")
-        ?.style.setProperty("transform", `scale(${scale})`);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.25 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
-  // escala de 1 a 1.2 según progreso
-  const scale = 1 + progress * 0.2;
-
   return (
-    <section className={styles.scrollImgSection} ref={sectionRef}>
-      <figure className={styles.scrollImgFigure} style={{ aspectRatio: ratio }}>
-        <img
-          src={src}
-          alt={alt}
-          className={styles.scrollImg}
-          style={{ transform: `scale(${scale})` }}
-        />
+    <section
+      ref={ref}
+      className={`${styles.scrollImgSection} ${styles.reveal} ${
+        inView ? styles.inView : ""
+      }`}
+      data-anim="left"
+    >
+      <figure className={styles.scrollImgFigure}>
+        <img src={src} alt={alt} className={styles.scrollImgStatic} />
       </figure>
     </section>
   );
@@ -423,7 +422,7 @@ const WeddingInvitation: React.FC = () => {
         {/* ====== REORGANIZACIÓN A PARTIR DEL CARRUSEL ====== */}
 
         {/* 1. Carrusel */}
-        <section
+        <div
           className={`${styles.card} ${styles.reveal}`}
           id="pedida"
           aria-label="La pedida de mano"
@@ -464,12 +463,12 @@ const WeddingInvitation: React.FC = () => {
             ]}
             speed={45}
           />
-        </section>
+        </div>
 
         {/* 2. Con la bendición de nuestros padres... */}
         <section
           id="padres"
-          className={`${styles.card} ${styles.reveal}`}
+          className={`${styles.card} ${styles.reveal} ${styles.pases}`}
           aria-label="Padres de los novios"
         >
           <h2 className={styles.sectionTitle}>
@@ -489,12 +488,12 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* 3. Imagen sin bordes con efecto al hacer scroll */}
-        <ScrollImage src={abrazoTierno} alt="Detalle del anillo" ratio="21/9" />
+        <ScrollImage src={abrazoTierno} alt="Detalle del anillo" />
 
         {/* 4. Itinerario */}
         <section
           id="itinerario"
-          className={`${styles.card} ${styles.reveal}`}
+          className={`${styles.card} ${styles.reveal} ${styles.pases}`}
           data-anim="left"
           aria-label="Itinerario de la boda"
         >
@@ -546,12 +545,12 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* 5. Imagen como la 3 */}
-        <ScrollImage src={manosAnillo} alt="Manos y anillo" ratio="21/9" />
+        <ScrollImage src={manosAnillo} alt="Manos y anillo" />
 
         {/* 6. #pases */}
         <section
           id="codigo"
-          className={`${styles.card} ${styles.reveal}`}
+          className={`${styles.card} ${styles.reveal} ${styles.pases}`}
           aria-label="Consulta de pases"
         >
           <h2 className={styles.sectionTitle}>
@@ -597,12 +596,12 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* 7. Imagen */}
-        <ScrollImage src={abrazoAlegre} alt="El gran momento" ratio="21/9" />
+        <ScrollImage src={abrazoAlegre} alt="El gran momento" />
 
         {/* 8. Confirmar asistencia */}
         <section
           id="rsvp"
-          className={`${styles.card} ${styles.reveal}`}
+          className={`${styles.card} ${styles.reveal} ${styles.pases}`}
           aria-label="Confirmación de asistencia"
         >
           <h2 className={styles.sectionTitle}>Confirmar asistencia (RSVP)</h2>
@@ -641,12 +640,12 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* 9. Imagen */}
-        <ScrollImage src={poniendo} alt="Abrazo tierno" ratio="21/9" />
+        <ScrollImage src={poniendo} alt="Abrazo tierno" />
 
         {/* 10. Detalles de regalo */}
         <section
           id="cuenta"
-          className={`${styles.card} ${styles.paper} ${styles.reveal}`}
+          className={`${styles.card} ${styles.paper} ${styles.reveal} ${styles.pases}`}
           aria-label="Detalles de regalo"
         >
           <h2 className={styles.sectionTitle}>Detalles de regalo</h2>
@@ -696,7 +695,7 @@ const WeddingInvitation: React.FC = () => {
         </section>
 
         {/* 10. Imagen */}
-        <ScrollImage src={mesas} alt="Abrazo tierno" ratio="21/9" />
+        <ScrollImage src={mesas} alt="Abrazo tierno" />
 
         {/* 11. Ubicación */}
         <section
@@ -717,22 +716,24 @@ const WeddingInvitation: React.FC = () => {
               allowFullScreen
             />
           </div>
-          <a
-            className={`${styles.btn} ${styles.rg}`}
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              VENUE
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Abrir en Google Maps
-          </a>
+          <div>
+            <a
+              className={`${styles.btn} ${styles.rg} ${styles.botonMaps}`}
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                VENUE
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Abrir en Google Maps
+            </a>
+          </div>
         </section>
 
         {/* 12. Ubica tu mesa */}
         <section
           id="mesas"
-          className={`${styles.card} ${styles.reveal}`}
+          className={`${styles.card} ${styles.reveal} ${styles.pases}`}
           aria-label="Plano de mesas"
         >
           <h2 className={styles.sectionTitle}>Ubica tu mesa</h2>
