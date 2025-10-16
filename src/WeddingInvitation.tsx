@@ -86,21 +86,40 @@ function useScrollTrigger(
 
 function useReveal() {
   const ref = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
-    const root = ref.current ?? document.body;
-    const els = Array.from(
-      root.querySelectorAll<HTMLElement>(`.${styles.reveal}`)
-    );
-    const io = new IntersectionObserver(
-      (entries) =>
-        entries.forEach(
-          (e) => e.isIntersecting && e.target.classList.add(styles.inView)
-        ),
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add(styles.inView);
+          }
+        });
+      },
       { threshold: 0.15 }
     );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+
+    function startObserving() {
+      const root = ref.current ?? document.body;
+      const elements = Array.from(
+        root.querySelectorAll<HTMLElement>(`.${styles.reveal}`)
+      );
+      elements.forEach((el) => observer.observe(el));
+    }
+
+    // ✅ Espera hasta que todas las imágenes y recursos carguen
+    if (document.readyState === "complete") {
+      startObserving();
+    } else {
+      window.addEventListener("load", startObserving);
+    }
+
+    return () => {
+      window.removeEventListener("load", startObserving);
+      observer.disconnect();
+    };
   }, []);
+
   return ref;
 }
 

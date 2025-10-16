@@ -1039,28 +1039,28 @@ section {
 /* Secuencia */
 .envelope {
   animation: slideFromTopLeft 0.9s ease-out both;
-  animation-delay: 0.5s;
+  animation-delay: 1.5s;
 }
 .inviteCard {
   animation: slideCardIn 1s ease-out both;
-  animation-delay: 0.8s;
+  animation-delay: 1.7s;
 }
 .ovalCard {
   animation: slideFromLeft 1s ease-out both;
-  animation-delay: 1.2s;
+  animation-delay: 2s;
 }
 .bottomBand,
 .paperStrip,
 .waxSeal {
   animation: slideFromBottomFixed 1s ease-out both;
-  animation-delay: 0.9s;
+  animation-delay: 1.2s;
 }
 
 /* Animaciones solo al entrar en vista (sobre) */
 .envelopeContainer * {
   opacity: 0;
   transform: translateY(30px);
-  transition: transform 0.8s ease-out, opacity 0.8s ease-out;
+  transition: transform 1.2s ease-out, opacity 0.8s ease-out;
 }
 .envelopeContainer.active * {
   opacity: 1;
