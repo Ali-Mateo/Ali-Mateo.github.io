@@ -358,6 +358,9 @@ const guest = useMemo(() => {
 }, [rsvpName, guestList]);
 
 const DEADLINE = new Date("2025-11-21T23:59:59");
+
+
+
 const handleNoAsistire = async () => {
   if (!guest) return setRsvpMsg("⚠️ Ese nombre no está en la lista.");
 
@@ -402,12 +405,14 @@ const handleNoAsistire = async () => {
 
 const submitRSVP = async (e: React.FormEvent) => {
   e.preventDefault();
+  
+  // Validar si el nombre está en la lista de invitados
   if (!guest) {
     setRsvpMsg("⚠️ Ese nombre no está en la lista de invitados.");
     return;
   }
 
-  // Descargar archivo actual
+  // Descargar el archivo actual (reservas.json)
   const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
     headers: { Authorization: `token ${GITHUB_TOKEN}` }
   });
@@ -415,55 +420,59 @@ const submitRSVP = async (e: React.FormEvent) => {
   let content: any[] = [];
   let sha = "";
 
-  if (res.ok) {
-    const json = await res.json();
-    sha = json.sha;
-    content = JSON.parse(atob(json.content));
-  }
+if (!res.ok) {
+  const errorData = await res.json();
+  console.error("GitHub API error:", errorData);
+  setRsvpMsg(`⚠️ Error al obtener el archivo de reservas: ${errorData.message}`);
+  return;
+}
 
+
+  // Buscar el grupo correspondiente
   const existingGroup = content.find(x => x.idGrupo === grupo);
 
-  // Chequear si ya tiene estado final
+  // Si el grupo ya está confirmado
   if (existingGroup?.estado === "confirmado") {
     setRsvpMsg(`🤍 Tu grupo ya confirmó ${existingGroup.pasesConfirmados} pase(s).`);
     return;
   }
 
+  // Si el grupo indicó que no asistirá
   if (existingGroup?.estado === "no_asiste") {
     setRsvpMsg("🤍 Tu grupo indicó que no podrá asistir.");
     return;
   }
 
-  // Fecha límite pasada
+  // Si la fecha límite ha pasado
   if (new Date() > DEADLINE) {
-  const newEntry = {
-    idGrupo: grupo,
-    nombres: grupoMiembros.map(m => m.nombre),
-    pasesAsignados,
-    pasesConfirmados: existingGroup?.pasesConfirmados ?? 0,
-    estado: "caducado",
-    fecha: new Date().toISOString()
-  };
+    const newEntry = {
+      idGrupo: grupo,
+      nombres: grupoMiembros.map(m => m.nombre),
+      pasesAsignados,
+      pasesConfirmados: existingGroup?.pasesConfirmados ?? 0,
+      estado: "caducado",
+      fecha: new Date().toISOString()
+    };
 
-  const updated = content.filter(x => x.idGrupo !== grupo).concat(newEntry);
+    const updated = content.filter(x => x.idGrupo !== grupo).concat(newEntry);
 
-  await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
-    method: "PUT",
-    headers: {
-      Authorization: `token ${GITHUB_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: "RSVP caducado",
-      content: btoa(JSON.stringify(updated, null, 2)),
-      sha
-    }),
-  });
+    // Actualizar el archivo en GitHub
+    await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: "RSVP caducado",
+        content: btoa(JSON.stringify(updated, null, 2)),  // Convertir el contenido actualizado a base64
+        sha
+      }),
+    });
 
-  setRsvpMsg("⏳ El tiempo de confirmación ha caducado. Gracias por tu consideración 🤍");
-  return;
-}
-
+    setRsvpMsg("⏳ El tiempo de confirmación ha caducado. Gracias por tu consideración 🤍");
+    return;
+  }
 
   // Registrar confirmación normal
   const newEntry = {
@@ -477,6 +486,7 @@ const submitRSVP = async (e: React.FormEvent) => {
 
   const updated = content.filter(x => x.idGrupo !== grupo).concat(newEntry);
 
+  // Actualizar el archivo con la nueva confirmación
   await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
     method: "PUT",
     headers: {
@@ -485,7 +495,7 @@ const submitRSVP = async (e: React.FormEvent) => {
     },
     body: JSON.stringify({
       message: "RSVP update",
-      content: btoa(JSON.stringify(updated, null, 2)),
+      content: btoa(JSON.stringify(updated, null, 2)),  // Convertir el contenido actualizado a base64
       sha
     }),
   });
