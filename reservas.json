@@ -19,5 +19,15 @@
     "pasesConfirmados": 1,
     "estado": "confirmado",
     "fecha": "2025-11-07T19:59:08.367Z"
+  },
+  {
+    "idGrupo": "989494489",
+    "nombres": [
+      "AZUCENA CÓRDOVA"
+    ],
+    "pasesAsignados": 1,
+    "pasesConfirmados": 1,
+    "estado": "confirmado",
+    "fecha": "2025-11-07T20:03:08.843Z"
   }
 ]
