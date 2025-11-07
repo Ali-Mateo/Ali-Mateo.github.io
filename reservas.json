@@ -10,17 +10,6 @@
     "fecha": "2025-11-07T19:18:23.325Z"
   },
   {
-    "idGrupo": "984680219",
-    "nombres": [
-      "FABRICIO AGUILAR",
-      "FABRICIO AGUILAR"
-    ],
-    "pasesAsignados": 2,
-    "pasesConfirmados": 1,
-    "estado": "confirmado",
-    "fecha": "2025-11-07T19:59:08.367Z"
-  },
-  {
     "idGrupo": "989494489",
     "nombres": [
       "AZUCENA CÓRDOVA"
@@ -39,5 +28,16 @@
     "pasesConfirmados": 0,
     "estado": "caducado",
     "fecha": "2025-11-07T20:08:46.130Z"
+  },
+  {
+    "idGrupo": "984680219",
+    "nombres": [
+      "FABRICIO AGUILAR",
+      "FABRICIO AGUILAR"
+    ],
+    "pasesAsignados": 2,
+    "pasesConfirmados": 0,
+    "estado": "no_asiste",
+    "fecha": "2025-11-07T20:09:16.259Z"
   }
 ]
