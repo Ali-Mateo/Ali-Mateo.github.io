@@ -318,7 +318,7 @@ const closeOverlay = () => setShowOverlay(false);
   }, []);
 
   // #pases (tipado para evitar "possibly null")
-  // const [code, setCode] = useState("");
+  const [code, setCode] = useState("");
   /* DEMO de #pases (reemplazar por API/Sheets real) */
 const [guestList, setGuestList] = useState<Guest[]>([]);
 
@@ -330,7 +330,7 @@ useEffect(() => {
     .then(text => {
       const rows = text.split("\n").map(r => r.trim()).filter(Boolean);
       const list = rows.map(r => {
-        const [ nombre, contacto, pases] = r.split(",");
+        const [idGrupo, nombre, contacto, parentesco, pases] = r.split(",");
         return {
           grupo: contacto.trim(), // numero = ID del grupo
           nombre: nombre.normalize("NFC").toUpperCase(),
@@ -796,10 +796,10 @@ const submitRSVP = async (e: React.FormEvent) => {
             </div>
           ) : null}
           <p className={styles.tinyHint}>*Ejemplos: AB123, FAM001, VIP777.</p>
-        </section> */}
-
+        </section>
+*/}
         {/* 7. Imagen */}
-        <ScrollImage src={abrazoAlegre} alt="El gran momento" />
+        <ScrollImage src={abrazoAlegre} alt="El gran momento" /> 
 
         {/* 8. Confirmar asistencia */}
         <section
