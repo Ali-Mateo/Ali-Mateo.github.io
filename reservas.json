@@ -49,5 +49,15 @@
     "pasesConfirmados": 1,
     "estado": "confirmado",
     "fecha": "2025-11-07T20:10:30.195Z"
+  },
+  {
+    "idGrupo": "986386976",
+    "nombres": [
+      "JOSHUE TORRES"
+    ],
+    "pasesAsignados": 1,
+    "pasesConfirmados": 1,
+    "estado": "confirmado",
+    "fecha": "2025-11-07T20:10:42.968Z"
   }
 ]
