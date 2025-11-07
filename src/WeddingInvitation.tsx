@@ -318,7 +318,7 @@ const closeOverlay = () => setShowOverlay(false);
   }, []);
 
   // #pases (tipado para evitar "possibly null")
-  const [code, setCode] = useState("");
+  // const [code, setCode] = useState("");
   /* DEMO de #pases (reemplazar por API/Sheets real) */
 const [guestList, setGuestList] = useState<Guest[]>([]);
 
@@ -530,7 +530,7 @@ const submitRSVP = async (e: React.FormEvent) => {
           <a href="#pedida">Carrusel</a>
           <a href="#padres">Padres</a>
           <a href="#itinerario">Itinerario</a>
-          <a href="#codigo">#pases</a>
+          {/* <a href="#codigo">#pases</a> */}
           <a href="#rsvp">Confirmar</a>
           <a href="#galeria">Galería</a>
           <a href="#mapa">Mapa</a>
@@ -750,7 +750,7 @@ const submitRSVP = async (e: React.FormEvent) => {
         {/* 5. Imagen como la 3 */}
         <ScrollImage src={manosAnillo} alt="Manos y anillo" />
 
-        {/* 6. #pases */}
+        {/* 6. #pases
         <section
           id="codigo"
           className={`${styles.card} ${styles.reveal} ${styles.pases}`}
@@ -796,7 +796,7 @@ const submitRSVP = async (e: React.FormEvent) => {
             </div>
           ) : null}
           <p className={styles.tinyHint}>*Ejemplos: AB123, FAM001, VIP777.</p>
-        </section>
+        </section> */}
 
         {/* 7. Imagen */}
         <ScrollImage src={abrazoAlegre} alt="El gran momento" />
