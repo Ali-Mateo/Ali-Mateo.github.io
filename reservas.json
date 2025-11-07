@@ -23,11 +23,21 @@
   {
     "idGrupo": "989494489",
     "nombres": [
-      "AZUCENA CÓRDOVA"
+      "AZUCENA CÃ“RDOVA"
     ],
     "pasesAsignados": 1,
     "pasesConfirmados": 1,
     "estado": "confirmado",
     "fecha": "2025-11-07T20:03:08.843Z"
+  },
+  {
+    "idGrupo": "962798441",
+    "nombres": [
+      "FREDY TORRES"
+    ],
+    "pasesAsignados": 1,
+    "pasesConfirmados": 0,
+    "estado": "caducado",
+    "fecha": "2025-11-07T20:04:21.776Z"
   }
 ]
