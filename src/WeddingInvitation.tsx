@@ -318,7 +318,7 @@ const closeOverlay = () => setShowOverlay(false);
   }, []);
 
   // #pases (tipado para evitar "possibly null")
-  const [code, setCode] = useState("");
+  // const [code, setCode] = useState("");
   /* DEMO de #pases (reemplazar por API/Sheets real) */
 const [guestList, setGuestList] = useState<Guest[]>([]);
 
@@ -331,6 +331,7 @@ useEffect(() => {
       const rows = text.split("\n").map(r => r.trim()).filter(Boolean);
       const list = rows.map(r => {
         const [idGrupo, nombre, contacto, parentesco, pases] = r.split(",");
+        console.log({ idGrupo, nombre, contacto, parentesco, pases });
         return {
           grupo: contacto.trim(), // numero = ID del grupo
           nombre: nombre.normalize("NFC").toUpperCase(),
