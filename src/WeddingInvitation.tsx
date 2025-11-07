@@ -23,23 +23,28 @@ import papelTexture from "./photos/papel.png";
 import qrExample from "./photos/QRlol.png"; // ejemplo QR//
 
 /* =====================
+   variables de entorno
+===================== */
+
+const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
+const REPO = "Ali-Mateo/Ali-Mateo.github.io";
+const FILE_PATH = "reservas.json";
+
+/* =====================
    Datos de la boda
 ===================== */
 const COUPLE = { groom: "Mateo Ordóñez", bride: "Alisson Torres" };
-const VENUE = "Quinta Los Corteza";
-const INVITE_DATE = "2026-02-07T12:00:00";
+const VENUE = "La Pradera Hacienda, Tabacundo, Ecuador";
+const INVITE_DATE = "2026-03-07T12:00:00";
 
-/* DEMO de #pases (reemplazar por API/Sheets real) */
-type Guest = { nombre: string; pases: number };
-const MOCK_CODES: Record<string, Guest> = {
-  AB123: { nombre: "Invitado de Ejemplo", pases: 2 },
-  FAM001: { nombre: "Familia Torres", pases: 4 },
-  VIP777: { nombre: "Amigo Especial", pases: 1 },
-};
+
+
 
 /* =====================
    Hooks
 ===================== */
+
+
 function useCountdown(targetISO: string) {
   const target = useMemo(() => new Date(targetISO).getTime(), [targetISO]);
   const [now, setNow] = useState(() => Date.now());
@@ -274,12 +279,13 @@ const CoverHero: React.FC<{ src: string; alt?: string }> = ({ src, alt }) => {
     >
       <div className={styles.coverOverlay}>
         <h1 className={styles.coverTitle}>
-          {COUPLE.groom.split(" ")[0]} &amp; {COUPLE.bride.split(" ")[0]}
+          {COUPLE.bride.split(" ")[0]} &amp; {COUPLE.groom.split(" ")[0]}
         </h1>
       </div>
     </header>
   );
 };
+
 
 /* =====================
    Componente principal
@@ -288,6 +294,17 @@ const WeddingInvitation: React.FC = () => {
   const t = useCountdown(INVITE_DATE);
   const ref = useReveal();
   const navHidden = useHideOnScroll();
+
+    // RSVP (demo)
+  const [rsvpName, setRsvpName] = useState("");
+  const [rsvpCount, setRsvpCount] = useState(1);
+  const [rsvpMsg, setRsvpMsg] = useState("");
+  const [showOverlay, setShowOverlay] = useState(false);
+
+useEffect(() => {
+  if (rsvpMsg) setShowOverlay(true);
+}, [rsvpMsg]);
+const closeOverlay = () => setShowOverlay(false);
 
   // Papel texturizado como patrón global
   useEffect(() => {
@@ -302,21 +319,184 @@ const WeddingInvitation: React.FC = () => {
 
   // #pases (tipado para evitar "possibly null")
   const [code, setCode] = useState("");
-  const guest: Guest | null = code.trim()
-    ? MOCK_CODES[code.trim().toUpperCase()] ?? null
-    : null;
+  /* DEMO de #pases (reemplazar por API/Sheets real) */
+const [guestList, setGuestList] = useState<Guest[]>([]);
 
-  // RSVP (demo)
-  const [rsvpName, setRsvpName] = useState("");
-  const [rsvpCount, setRsvpCount] = useState(1);
-  const [rsvpMsg, setRsvpMsg] = useState("");
-  const submitRSVP = (e: React.FormEvent) => {
-    e.preventDefault();
-    setRsvpMsg("¡Gracias! Tu aceptación quedó registrada. (Demo)");
+type Guest = { grupo: string; nombre: string; pases: number };
+
+useEffect(() => {
+  fetch("https://raw.githubusercontent.com/Ali-Mateo/Ali-Mateo.github.io/main/invitados_normalizado.csv")
+    .then(res => res.text())
+    .then(text => {
+      const rows = text.split("\n").map(r => r.trim()).filter(Boolean);
+      const list = rows.map(r => {
+        const [ nombre, contacto, pases] = r.split(",");
+        return {
+          grupo: contacto.trim(), // numero = ID del grupo
+          nombre: nombre.normalize("NFC").toUpperCase(),
+          pases: Number(pases) || 1
+        };
+      });
+      setGuestList(list);
+    });
+}, []);
+
+const grupo = useMemo(() => {
+  const nombre = rsvpName.trim().toUpperCase();
+  return guestList.find(g => g.nombre === nombre)?.grupo || null;
+}, [rsvpName, guestList]);
+
+const grupoMiembros = useMemo(() => {
+  return guestList.filter(g => g.grupo === grupo);
+}, [grupo, guestList]);
+
+const pasesAsignados = grupoMiembros.length; // grupo completo
+
+const guest = useMemo(() => {
+  return guestList.find(g => g.nombre === rsvpName.trim().toUpperCase()) || null;
+}, [rsvpName, guestList]);
+
+const DEADLINE = new Date("2025-11-21T23:59:59");
+const handleNoAsistire = async () => {
+  if (!guest) return setRsvpMsg("⚠️ Ese nombre no está en la lista.");
+
+  // Descargar archivo
+  const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
+    headers: { Authorization: `token ${GITHUB_TOKEN}` }
+  });
+
+  let content: any[] = [];
+  let sha = "";
+
+  if (res.ok) {
+    const json = await res.json();
+    sha = json.sha;
+    content = JSON.parse(atob(json.content));
+  }
+
+  const updated = content.filter(x => x.idGrupo !== grupo).concat({
+    idGrupo: grupo,
+    nombres: grupoMiembros.map(m => m.nombre),
+    pasesAsignados,
+    pasesConfirmados: 0,
+    estado: "no_asiste",
+    fecha: new Date().toISOString()
+  });
+
+  await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message: "RSVP NO ASISTE",
+      content: btoa(JSON.stringify(updated, null, 2)),
+      sha
+    }),
+  });
+
+  setRsvpMsg("🤍 Gracias por avisarnos. Te deseamos siempre lo mejor.");
+};
+
+const submitRSVP = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!guest) {
+    setRsvpMsg("⚠️ Ese nombre no está en la lista de invitados.");
+    return;
+  }
+
+  // Descargar archivo actual
+  const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
+    headers: { Authorization: `token ${GITHUB_TOKEN}` }
+  });
+
+  let content: any[] = [];
+  let sha = "";
+
+  if (res.ok) {
+    const json = await res.json();
+    sha = json.sha;
+    content = JSON.parse(atob(json.content));
+  }
+
+  const existingGroup = content.find(x => x.idGrupo === grupo);
+
+  // Chequear si ya tiene estado final
+  if (existingGroup?.estado === "confirmado") {
+    setRsvpMsg(`🤍 Tu grupo ya confirmó ${existingGroup.pasesConfirmados} pase(s).`);
+    return;
+  }
+
+  if (existingGroup?.estado === "no_asiste") {
+    setRsvpMsg("🤍 Tu grupo indicó que no podrá asistir.");
+    return;
+  }
+
+  // Fecha límite pasada
+  if (new Date() > DEADLINE) {
+  const newEntry = {
+    idGrupo: grupo,
+    nombres: grupoMiembros.map(m => m.nombre),
+    pasesAsignados,
+    pasesConfirmados: existingGroup?.pasesConfirmados ?? 0,
+    estado: "caducado",
+    fecha: new Date().toISOString()
   };
 
+  const updated = content.filter(x => x.idGrupo !== grupo).concat(newEntry);
+
+  await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message: "RSVP caducado",
+      content: btoa(JSON.stringify(updated, null, 2)),
+      sha
+    }),
+  });
+
+  setRsvpMsg("⏳ El tiempo de confirmación ha caducado. Gracias por tu consideración 🤍");
+  return;
+}
+
+
+  // Registrar confirmación normal
+  const newEntry = {
+    idGrupo: grupo,
+    nombres: grupoMiembros.map(m => m.nombre),
+    pasesAsignados,
+    pasesConfirmados: rsvpCount,
+    estado: "confirmado",
+    fecha: new Date().toISOString()
+  };
+
+  const updated = content.filter(x => x.idGrupo !== grupo).concat(newEntry);
+
+  await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message: "RSVP update",
+      content: btoa(JSON.stringify(updated, null, 2)),
+      sha
+    }),
+  });
+
+  setRsvpMsg("💌 Gracias, tu confirmación fue registrada.");
+};
+
+
+
   // Cuenta bancaria (demo)
-  const account = "000-000000-00 (Banco Ejemplo)";
+  const account = 
+ " Banco Pichincha \n Cuenta de ahorros \n 2209176525 \n C.I  \n Mateo Ordóñez "
   const [copied, setCopied] = useState(false);
   const copyAccount = async () => {
     await navigator.clipboard.writeText(account);
@@ -378,11 +558,11 @@ const WeddingInvitation: React.FC = () => {
                 Nos complace invitarte a celebrar nuestra unión
               </p>
               <h2 className={styles.inviteNames}>
-                Mateo Ordóñez <span>&</span> Alisson Torres
+                Alisson Torres <span>&</span>  Mateo Ordóñez
               </h2>
               <p className={styles.inviteDetails}>
                 Sábado, 7 de febrero de 2026 <br />
-                <strong>Quinta Los Corteza</strong> <br />a las 12:00 p.m.
+                <strong>La Pradera Hacienda</strong> <br />a las 12:00 p.m.
               </p>
             </div>
 
@@ -495,13 +675,17 @@ const WeddingInvitation: React.FC = () => {
           </h2>
           <ul className={styles.parents}>
             <li>
-              <strong>Vicente Ordóñez</strong> & <strong>Laura Córdova</strong>{" "}
-              <span>(padres del novio)</span>
+              <strong>Vicente Ordóñez</strong>
+              <li>&</li> 
+               <strong>Laura Córdova</strong>{" "}
             </li>
+            {" "}
+            <span>y</span>
+            {" "}
             <li>
-              <strong>Maria Judith Aguirre Mera</strong> &{" "}
-              <strong>Jose Fredy Torres Cruz</strong>{" "}
-              <span>(padres de la novia)</span>
+              <strong>Maria Aguirre</strong>  <li>&</li> 
+              {" "}
+              <strong>Jose Torres</strong>{" "}
             </li>
           </ul>
         </section>
@@ -560,7 +744,7 @@ const WeddingInvitation: React.FC = () => {
             </div>
           </div>
 
-          <p className={styles.tinyHint}>*Horarios referenciales</p>
+          {/* <p className={styles.tinyHint}>*Horarios referenciales</p> */}
         </section>
 
         {/* 5. Imagen como la 3 */}
@@ -626,35 +810,61 @@ const WeddingInvitation: React.FC = () => {
           <h2 className={styles.sectionTitle}>Confirmar asistencia (RSVP)</h2>
           <form className={styles.form} onSubmit={submitRSVP}>
             <label>
-              Nombre completo
-              <input
-                className={styles.input}
-                value={rsvpName}
-                onChange={(e) => setRsvpName(e.target.value)}
-                required
-                autoComplete="name"
-              />
-            </label>
+  Nombre completo (como aparece en la invitación)
+  <input
+    className={styles.input}
+    value={rsvpName}
+    onChange={(e) => setRsvpName(e.target.value.toUpperCase())}
+    required
+  />
+</label>
+
+{rsvpName && !guest && (
+  <p className={styles.bad}>⚠️ Ese nombre no está en la lista.</p>
+)}
+
+{guest && (
+  <p className={styles.ok}>✅ Encontrado: tienes {guest.pases} pase(s).</p>
+)}
+
+
             <label>
               Nº de personas
               <input
-                className={styles.input}
-                type="number"
-                min={1}
-                max={10}
-                value={rsvpCount}
-                onChange={(e) => setRsvpCount(parseInt(e.target.value || "1"))}
-                required
-              />
+  className={styles.input}
+  type="number"
+  min={1}
+  max={guest?.pases || 1}
+  value={rsvpCount}
+  onChange={(e) => {
+    const val = parseInt(e.target.value || "1");
+    setRsvpCount(Math.min(val, guest?.pases || 1));
+  }}
+  required
+/>
+
             </label>
+            
             <button className={`${styles.btn} ${styles.rg}`} type="submit">
               Enviar aceptación
             </button>
-            {rsvpMsg && (
-              <p className={styles.okMsg} aria-live="polite">
-                {rsvpMsg}
-              </p>
-            )}
+            <button
+  type="button"
+  className={`${styles.btn} ${styles.ghost}`}
+  onClick={handleNoAsistire}
+>
+  No podré asistir
+</button>
+
+            {showOverlay && (
+  <div className={styles.overlayBackdrop} onClick={closeOverlay}>
+    <div className={styles.overlayBox} onClick={(e) => e.stopPropagation()}>
+      <p>{rsvpMsg}</p>
+      <button className={styles.btn} onClick={closeOverlay}>Cerrar</button>
+    </div>
+  </div>
+)}
+
           </form>
         </section>
 
@@ -677,19 +887,24 @@ const WeddingInvitation: React.FC = () => {
           <div className={styles.accountRow}>
             <div className={styles.accountBox}>
               <p>
-                <strong>Banco:</strong> Banco Pichincha
+                {/* <strong>Banco:</strong> */}
+                Banco Pichincha 
               </p>
               <p>
-                <strong>Tipo de cuenta:</strong> Ahorros
+                {/* <strong>Tipo de cuenta:</strong>  */}
+                Ahorros
               </p>
               <p>
-                <strong>Número de cuenta:</strong> 1234567890
+                {/* <strong>Número de cuenta:</strong>  */}
+                2209176525
               </p>
               <p>
-                <strong>Cédula:</strong> 0102030405
+                {/* <strong>Cédula:</strong> */}
+                1111111111
               </p>
               <p>
-                <strong>Correo:</strong> novios@example.com
+                {/* <strong>Correo:</strong>  */}
+                aliymateo.07.02.2026@gmail.com
               </p>
             </div>
             <div className={styles.qrBox}>
@@ -757,8 +972,7 @@ const WeddingInvitation: React.FC = () => {
         >
           <h2 className={styles.sectionTitle}>Ubica tu mesa</h2>
           <p className={styles.muted}>
-            Aquí va la imagen del plano (proporción 16/9 o 3/4, se recorta con
-            cover).
+            Próximamente ...
           </p>
           <div className={styles.inviteBox}>
             <img

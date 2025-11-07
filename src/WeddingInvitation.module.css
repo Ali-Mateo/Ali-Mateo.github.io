@@ -3,35 +3,56 @@
    ========================= */
 
 /* Fonts */
-@import url("https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Mea+Culpa&family=Manrope:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Mea+Culpa&family=Cormorant+Garamond:wght@300;400;500;600;700&family=Cormorant+Unicase:wght@300;400;500;600;700&display=swap");
 
 /* -------------------------
    Tokens / palette
 ------------------------- */
 :root {
-  --rose-gold: #b76e79;
+  --rose-gold: #a37f8c;
   --gold: #c9a14a;
   --blush: #f5e1de;
   --blush-2: #f9e8ee;
   --ink: #2b2b2b;
   --muted: #6d6d6d;
   --surface: #ffffff;
+  --font-scale: 1rem; /* cámbialo para agrandar todo */
 
   --rg-grad: linear-gradient(
     135deg,
     var(--rose-gold),
-    #d6a6a8 40%,
+    #eacce0 40%,
     var(--blush)
   );
 
   --font-art: "Mea Culpa", cursive;
-  --font-script: "Cedarville Cursive", cursive;
-  --font-serif: "Playfair Display", serif;
-  --font-serif-aux: "Cormorant Garamond", serif;
+  --font-script: "Mea Culpa", cursive;
+  --font-serif: "Cormorant Unicase", serif;
+  --font-serif-aux: "Cormorant Unicase", serif;
   --font-sans: "Manrope", system-ui, sans-serif;
+
+  /* --font-display: "Cormorant Unicase", serif; */
+  /* --font-body: "Cormorant Garamond", serif; */
+  /* --font-art: "Mea Culpa", cursive; */
+
+    /* ====== VARIABLES PARA EL SOBRE ====== */
+  --sobre-base: #bbabb9;         /* color general */
+  --sobre-luz: #ffe4f9;          /* zonas claras / reflejo */
+  --sobre-sombra: #b39da5;       /* sombras / pliegues */
+  
+  --paper-card: #fffaf7; /* 👈 Color global para la tarjeta */
+
+  --band-top: #bbabb9;   /* tono más oscuro / base */
+  --band-bottom: #b39da5; /* tono más claro hacia arriba */
 
   --radius: 1rem;
   --count-h: clamp(88px, 12vh, 140px);
+
+  --count-bg-light: #fff;
+  --count-bg-mid: #f8f4f3;
+  --count-border: #e4d7d2;
+  --count-number: var(--rose-gold); /* ya tienes este tono rosado metalizado */
+  --count-label: #8b698f; /* si quieres, también lo puedes sustituir por var(--muted) */
 }
 
 /* -------------------------
@@ -188,7 +209,14 @@
 .sectionTitle {
   font-family: var(--font-serif);
   font-weight: 600;
-  font-size: clamp(1.1rem, 0.9rem + 0.6vw, 1.35rem);
+  font-size: clamp(2rem, 0.9rem + 0.6vw, 2.5rem);
+  text-align: center;
+  margin: 2rem auto;
+}
+.sectionTitle2 {
+  font-family: var(--font-art);
+  font-weight: 800;
+  font-size: clamp(2rem, 0.9rem + 0.6vw, 2.5rem);
   text-align: center;
   margin: 2rem auto;
 }
@@ -400,7 +428,8 @@
   padding: 0.65rem 0.8rem;
   border-radius: 0.6rem;
   border: 1px solid color-mix(in srgb, var(--rose-gold) 35%, transparent);
-  background: #fff;
+  background: #ffffff;
+  color: #2b2b2b;
   font: inherit;
   margin: 0.3rem 0;
 }
@@ -413,7 +442,7 @@
 }
 .rg {
   background: var(--rg-grad);
-  color: #fff;
+  color: #f6d6d6;
 }
 .ghost {
   background: transparent;
@@ -607,13 +636,14 @@
   height: 3rem;
   object-fit: contain;
   margin-bottom: 0.5rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  filter: grayscale(2) contrast(1.1) brightness(1.05);
   transition: transform 0.25s ease, filter 0.25s ease;
 }
 .itineraryIconImg:hover {
   transform: scale(1.08);
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
 }
+
 .itineraryTime {
   font-family: var(--font-serif);
   font-weight: 700;
@@ -630,6 +660,10 @@
   color: var(--ink);
   line-height: 1.35;
 }
+
+
+
+
 
 /* ========== Cover hero con capa media negra ========== */
 .coverHero {
@@ -723,7 +757,7 @@
   display: block;
   font-family: "Manrope", sans-serif;
   font-size: 0.75rem;
-  color: #a97d6c;
+  color: var(--count-label);
   letter-spacing: 0.15em;
   margin-top: 0.4rem;
   text-transform: uppercase;
@@ -737,7 +771,7 @@
   left: -1.2rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #c68a70;
+  color: var(--count-label);
   font-size: 2rem;
   font-weight: 600;
   line-height: 1;
@@ -751,8 +785,12 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(circle at 50% 40%, #fff 40%, #f8f4f3 100%);
-  border: 1px solid #e4d7d2;
+ background: radial-gradient(
+    circle at 50% 40%,
+    var(--count-bg-light) 40%,
+    var(--count-bg-mid) 100%
+  );
+  border: 1px solid var(--count-border);
   box-shadow: 0 3px 14px rgba(0, 0, 0, 0.05);
   text-align: center;
   margin: 0 auto 2rem auto;
@@ -768,7 +806,7 @@
   font-family: "Playfair Display", serif;
   font-weight: 700;
   font-size: 3.2rem;
-  color: #a05b4b;
+  color: var(--count-number);
   line-height: 1;
 }
 .countCircle small {
@@ -776,7 +814,7 @@
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #b07a6b;
+  color: var(--count-label);
   margin-top: 0.3rem;
 }
 .countStrip {
@@ -801,20 +839,24 @@ section {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 320px;
+  width: 100vw;
+  height: 80vh;
+  margin-top: 0;
+  margin-bottom: 0;
 }
+
 .envelopeContainer {
-  height: 380px;
+  height: clamp(240px, 45vw, 550px);
   position: relative;
-  width: 320px;
-  margin: 5rem auto;
+  width: clamp(240px, 45vw, 550px);
+  top: -100px;
 }
 
 /* Capa 1: Sobre */
 .envelope {
   position: relative;
-  width: 240px;
-  height: 180px;
+  width: clamp(240px, 45vw, 550px);
+  height: clamp(210px, 40vw, 400px); /* ← vuelve a darle un alto dinámico pero controlado */
   background: transparent;
   margin: 2rem auto;
   animation: slideFromTopLeft 0.9s ease-out both;
@@ -823,7 +865,7 @@ section {
 .envelopeBody {
   position: absolute;
   inset: 0;
-  background: #eec4a9;
+  background: var(--sobre-base);
   z-index: 1;
   clip-path: polygon(0 100%, 100% 100%, 100% 25%, 50% 0, 0 25%);
 }
@@ -832,7 +874,7 @@ section {
   top: 0;
   width: 100%;
   height: 70%;
-  background: linear-gradient(to left, #f7dbcc, #eecebb);
+  background: linear-gradient(to left, var(--sobre-luz), var(--sobre-base));
   clip-path: polygon(5% 45%, 50% 10%, 95% 45%, 95% 100%, 5% 100%);
   z-index: 2;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
@@ -847,12 +889,12 @@ section {
 }
 .foldLeft {
   left: 0;
-  background: linear-gradient(to right, #ddac8e, #dcb095, #eec4a9, #eec4a9);
+  background: linear-gradient(to right, var(--sobre-sombra), var(--sobre-base));
   clip-path: polygon(0 0, 100% 50%, 100% 100%, 0 100%);
 }
 .foldRight {
   right: 0;
-  background: linear-gradient(to right, #cd9877, #eec4a9);
+  background: linear-gradient(to right, var(--sobre-sombra), var(--sobre-base));
   clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);
 }
 .envelopeBottom {
@@ -860,7 +902,7 @@ section {
   top: 70%;
   width: 100%;
   height: 50%;
-  background: linear-gradient(to left, #cd9877, #eec4a9);
+  background: linear-gradient(to left, var(--sobre-sombra), var(--sobre-base));
   clip-path: polygon(20% 0%, 80% 0, 100% 100%, 0% 100%);
   z-index: 3;
 }
@@ -868,36 +910,42 @@ section {
 /* Capa 2: Tarjeta principal */
 .inviteCard {
   position: absolute;
-  top: 25%;
-  left: 50%;
-  transform: translate(-50%, 0);
-  width: 65%;
-  background: #fffaf7;
+  top: 30%;
+  left: 60%;
+  width: clamp(240px, 45vw, 450px);
+  height: clamp(220px, 40vw, 350px);
+  padding: 1.2rem 1.4rem;
+  background: var(--paper-card);
   border-radius: 0.4rem;
   box-shadow: 0 15px 20px rgba(0, 0, 0, 0.55);
-  padding: 0.5rem;
   text-align: center;
+  font-size: clamp(0.8rem, 1rem + 0.4vw, 1.15rem);
   z-index: 8;
   animation: slideCardIn 1s ease-out both;
 }
 
+
 .inviteIntro {
-  font-size: 0.6rem;
+  font-size: clamp(0.2rem, 0.7rem + 0.3vw, 1.2rem);
   font-family: var(--font-serif-aux);
   color: var(--muted);
   margin-bottom: 0.7rem;
   line-height: 1.3;
+  word-wrap: break-word;
+  text-wrap: balance; /* hermoso si el navegador lo soporta */
+  max-width: 100%;
 }
 .inviteNames {
   font-family: "Mea Culpa", cursive;
   color: var(--ink);
-  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  font-size: clamp(1.5rem, 6vw, 3rem);
   margin: 0.3rem 0 0.4rem;
   line-height: 1.1;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: auto;
 }
 .inviteNames span {
   display: block;
@@ -908,10 +956,11 @@ section {
   margin: 0.1rem 0;
 }
 .inviteDetails {
+  font-size: clamp(0.8rem, 0.7rem + 0.3vw, 1.35rem);
+  line-height: 1.4;
   color: var(--ink);
-  font-size: 0.6rem;
-  line-height: 1;
 }
+
 .inviteDetails strong {
   color: var(--rose-gold);
   font-size: 1rem;
@@ -922,35 +971,43 @@ section {
   box-shadow: 0 15px 20px rgba(0, 0, 0, 0.55);
   line-height: 0.8;
   position: absolute;
-  left: 5%;
-  bottom: 10%;
+  left: 2%;
+  bottom: 0%;
   background: #fffaf7;
   border-radius: 50%;
-  width: 80px;
-  height: 120px;
+  width: clamp(45px, 16vw, 100px);
+  height: clamp(75px, 25vw, 170px);
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-  font-size: 1rem;
+  font-size: clamp(0.7rem, 0.7rem + 0.3vw, 1.5rem);
   color: var(--muted);
-  z-index: 3;
+  z-index: 9;
   font-family: "Mea Culpa", cursive;
 }
 
 /* Capa 4: Banda + papel + sello */
 .bottomBand {
   position: absolute;
-  bottom: 0;
+  bottom: -12vh; /* PC / pantallas grandes */
   left: 50%;
   transform: translateX(-50%);
   width: 60%;
   height: 6rem;
-  background: linear-gradient(to top, #e3bfa4, #edcbb2);
+  background: linear-gradient(to top, var(--band-top), var(--band-bottom));
   border-radius: 0.4rem;
   z-index: 1;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
 }
+
+/* 📱 Ajuste para móvil: pantalla pequeña */
+@media (max-width: 600px) {
+  .bottomBand {
+    bottom: -20vh;
+  }
+}
+
 .paperStrip {
   position: absolute;
   left: 50%;
@@ -964,13 +1021,13 @@ section {
 }
 .waxSeal {
   position: absolute;
-  bottom: 1.8rem;
+  bottom: 1.5rem;
   left: 50%;
   transform: translateX(-50%);
   width: 3.3rem;
   height: 3.3rem;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #d9957b, #a56550 80%);
+  background: linear-gradient(to top, var(--band-top), var(--band-bottom));
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1092,7 +1149,7 @@ section {
   flex: 1;
   max-width: max-content;
   font-family: var(--font-serif-aux);
-  font-size: 0.95rem;
+  font-size: 0.7rem;
   line-height: 0.5;
 }
 .qrBox {
@@ -1130,12 +1187,58 @@ section {
   margin: 0.5rem auto 0;
   max-width: 40rem;
   text-align: center;
+  font-family: var(--font-art);
+  font-size: 30px;
+
 }
 .parents li {
-  margin: 0.35rem 0;
+  margin: 0.2rem 0;
   color: var(--ink);
 }
 .parents span {
   color: var(--muted);
-  font-size: 0.95em;
+  font-size: 0.9em;
+  font-family: var(--font-serif-aux);
+
+
+}
+
+
+.overlayBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: fadeIn 0.25s ease forwards;
+}
+
+.overlayBox {
+  background: var(--surface, #fff);
+  padding: 26px 32px;
+  border-radius: 14px;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+  box-shadow: 0 10px 38px rgba(0,0,0,0.25);
+  animation: popUp 0.3s ease forwards;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.overlayBox p {
+  margin-bottom: 1.2rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+@keyframes popUp {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
