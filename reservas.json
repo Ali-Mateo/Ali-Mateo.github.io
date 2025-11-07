@@ -39,5 +39,15 @@
     "pasesConfirmados": 0,
     "estado": "no_asiste",
     "fecha": "2025-11-07T20:09:18.899Z"
+  },
+  {
+    "idGrupo": "989477779",
+    "nombres": [
+      "ALISON TORRES"
+    ],
+    "pasesAsignados": 1,
+    "pasesConfirmados": 1,
+    "estado": "confirmado",
+    "fecha": "2025-11-07T20:10:30.195Z"
   }
 ]
