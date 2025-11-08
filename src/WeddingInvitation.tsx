@@ -33,7 +33,7 @@ const FILE_PATH = "reservas.json";
 /* =====================
    Datos de la boda
 ===================== */
-const COUPLE = { groom: "Mateo Ordóñez", bride: "Alisson Torres" };
+const COUPLE = { groom: "Mateo Ordóñez", bride: "Alison Torres" };
 const VENUE = "La Pradera Hacienda, Tabacundo, Ecuador";
 const INVITE_DATE = "2026-03-07T12:00:00";
 
@@ -331,9 +331,9 @@ useEffect(() => {
       const rows = text.split("\n").map(r => r.trim()).filter(Boolean);
       const list = rows.map(r => {
         const [idGrupo, nombre, contacto, parentesco, pases] = r.split(",");
-        console.log({ idGrupo, nombre, contacto, parentesco, pases });
+        // console.log({ idGrupo, nombre, contacto, parentesco, pases });
         return {
-          grupo: contacto.trim(), // numero = ID del grupo
+          grupo: contacto.trim() || idGrupo || parentesco, // numero = ID del grupo
           nombre: nombre.normalize("NFC").toUpperCase(),
           pases: Number(pases) || 1
         };
@@ -363,11 +363,12 @@ const DEADLINE = new Date("2025-11-21T23:59:59");
 
 const handleNoAsistire = async () => {
   if (!guest) return setRsvpMsg("⚠️ Ese nombre no está en la lista.");
+console.log('Token de GitHub:', GITHUB_TOKEN); // Para verificar que el token se carga correctamente
+const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
+  headers: { Authorization: `token ${GITHUB_TOKEN}` }
+});
 
-  // Descargar archivo
-  const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
-    headers: { Authorization: `token ${GITHUB_TOKEN}` }
-  });
+ 
 
   let content: any[] = [];
   let sha = "";
@@ -405,14 +406,12 @@ const handleNoAsistire = async () => {
 
 const submitRSVP = async (e: React.FormEvent) => {
   e.preventDefault();
-  
-  // Validar si el nombre está en la lista de invitados
   if (!guest) {
     setRsvpMsg("⚠️ Ese nombre no está en la lista de invitados.");
     return;
   }
 
-  // Descargar el archivo actual (reservas.json)
+  // Descargar archivo actual
   const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
     headers: { Authorization: `token ${GITHUB_TOKEN}` }
   });
@@ -420,59 +419,55 @@ const submitRSVP = async (e: React.FormEvent) => {
   let content: any[] = [];
   let sha = "";
 
-if (!res.ok) {
-  const errorData = await res.json();
-  console.error("GitHub API error:", errorData);
-  setRsvpMsg(`⚠️ Error al obtener el archivo de reservas: ${errorData.message}`);
-  return;
-}
+  if (res.ok) {
+    const json = await res.json();
+    sha = json.sha;
+    content = JSON.parse(atob(json.content));
+  }
 
-
-  // Buscar el grupo correspondiente
   const existingGroup = content.find(x => x.idGrupo === grupo);
 
-  // Si el grupo ya está confirmado
+  // Chequear si ya tiene estado final
   if (existingGroup?.estado === "confirmado") {
     setRsvpMsg(`🤍 Tu grupo ya confirmó ${existingGroup.pasesConfirmados} pase(s).`);
     return;
   }
 
-  // Si el grupo indicó que no asistirá
   if (existingGroup?.estado === "no_asiste") {
     setRsvpMsg("🤍 Tu grupo indicó que no podrá asistir.");
     return;
   }
 
-  // Si la fecha límite ha pasado
+  // Fecha límite pasada
   if (new Date() > DEADLINE) {
-    const newEntry = {
-      idGrupo: grupo,
-      nombres: grupoMiembros.map(m => m.nombre),
-      pasesAsignados,
-      pasesConfirmados: existingGroup?.pasesConfirmados ?? 0,
-      estado: "caducado",
-      fecha: new Date().toISOString()
-    };
+  const newEntry = {
+    idGrupo: grupo,
+    nombres: grupoMiembros.map(m => m.nombre),
+    pasesAsignados,
+    pasesConfirmados: existingGroup?.pasesConfirmados ?? 0,
+    estado: "caducado",
+    fecha: new Date().toISOString()
+  };
 
-    const updated = content.filter(x => x.idGrupo !== grupo).concat(newEntry);
+  const updated = content.filter(x => x.idGrupo !== grupo).concat(newEntry);
 
-    // Actualizar el archivo en GitHub
-    await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `token ${GITHUB_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: "RSVP caducado",
-        content: btoa(JSON.stringify(updated, null, 2)),  // Convertir el contenido actualizado a base64
-        sha
-      }),
-    });
+  await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message: "RSVP caducado",
+      content: btoa(JSON.stringify(updated, null, 2)),
+      sha
+    }),
+  });
 
-    setRsvpMsg("⏳ El tiempo de confirmación ha caducado. Gracias por tu consideración 🤍");
-    return;
-  }
+  setRsvpMsg("⏳ El tiempo de confirmación ha caducado. Gracias por tu consideración 🤍");
+  return;
+}
+
 
   // Registrar confirmación normal
   const newEntry = {
@@ -486,7 +481,6 @@ if (!res.ok) {
 
   const updated = content.filter(x => x.idGrupo !== grupo).concat(newEntry);
 
-  // Actualizar el archivo con la nueva confirmación
   await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
     method: "PUT",
     headers: {
@@ -495,13 +489,16 @@ if (!res.ok) {
     },
     body: JSON.stringify({
       message: "RSVP update",
-      content: btoa(JSON.stringify(updated, null, 2)),  // Convertir el contenido actualizado a base64
+      content: btoa(JSON.stringify(updated, null, 2)),
       sha
     }),
   });
 
   setRsvpMsg("💌 Gracias, tu confirmación fue registrada.");
 };
+
+
+
 
 
 
@@ -569,7 +566,7 @@ if (!res.ok) {
                 Nos complace invitarte a celebrar nuestra unión
               </p>
               <h2 className={styles.inviteNames}>
-                Alisson Torres <span>&</span>  Mateo Ordóñez
+                Alison Torres <span>&</span>  Mateo Ordóñez
               </h2>
               <p className={styles.inviteDetails}>
                 Sábado, 7 de febrero de 2026 <br />
@@ -685,20 +682,14 @@ if (!res.ok) {
             Con la bendición de nuestros padres
           </h2>
           <ul className={styles.parents}>
-            <li>
-              <strong>Vicente Ordóñez</strong>
-              <li>&</li> 
-               <strong>Laura Córdova</strong>{" "}
-            </li>
-            {" "}
-            <span>y</span>
-            {" "}
-            <li>
-              <strong>Maria Aguirre</strong>  <li>&</li> 
-              {" "}
-              <strong>Jose Torres</strong>{" "}
-            </li>
-          </ul>
+  <li>
+    <strong>Vicente Ordóñez</strong> & <strong>Laura Córdova</strong>
+  </li>
+  <li>
+    <strong>Maria Aguirre</strong> & <strong>Jose Torres</strong>
+  </li>
+</ul>
+
         </section>
 
         {/* 3. Imagen sin bordes con efecto al hacer scroll */}
