@@ -162,6 +162,8 @@
   background: color-mix(in srgb, var(--blush) 40%, transparent);
 }
 
+
+
 /* -------------------------
    Invitación: papel + PNG
 ------------------------- */
@@ -210,9 +212,10 @@
 .sectionTitle {
   font-family: var(--font-serif);
   font-weight: 600;
-  font-size: clamp(2rem, 0.9rem + 0.6vw, 2.5rem);
+  font-size: clamp(1rem, 0.5rem + 0.6vw, 2rem);
   text-align: center;
   margin: 2rem auto;
+
 }
 .sectionTitle2 {
   font-family: var(--font-art);
@@ -220,6 +223,9 @@
   font-size: clamp(2rem, 0.9rem + 0.6vw, 2.5rem);
   text-align: center;
   margin: 2rem auto;
+      text-shadow:
+    0px 1px 1px rgba(255,255,255,0.9), /* brillo arriba */
+    0px -1px 2px rgba(0,0,0,0.25);    /* sombra abajo */
 }
 .scriptSubtle {
   font-family: var(--font-script);
@@ -228,9 +234,9 @@
 .hash {
   color: var(--rose-gold);
 }
-.muted {
+/* .muted {
   color: var(--muted);
-}
+} */
 
 /* Card neutral */
 .card {
@@ -435,15 +441,15 @@
   margin: 0.3rem 0;
 }
 .btn {
-  padding: 0.65rem 1.1rem;
-  border-radius: 999rem;
+  padding: 0.4rem 1rem;
+  border-radius: 800rem;
   border: none;
   cursor: pointer;
   font-weight: 600;
 }
 .rg {
   background: var(--rg-grad);
-  color: #f6d6d6;
+  color: var(--rose-gold);
 }
 .ghost {
   background: transparent;
@@ -708,7 +714,7 @@
 }
 .coverOverlay {
   position: relative;
-  z-index: 3;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -722,7 +728,51 @@
   font-size: clamp(2.2rem, 7vw, 5rem);
   margin: 0;
   letter-spacing: 0.02em;
+  bottom: 10%;
 }
+.coverHeroContent {
+  text-align: center;
+  color: white;
+  margin-top: -7vh; /* <-- aquí ajustas cuánto más abajo se ve todo */
+  /* si quieres bajarlo más, sube este número: 8vh, 10vh, 12vh */
+}
+
+.calendarRow {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap; /* para que no se rompa en móviles */
+}
+
+/* -------------------------
+   portada: verisculo
+------------------------- */
+
+.verseBox {
+  margin: 0 auto;
+  max-width: 42rem;
+  color: #f7f7f7;
+}
+
+.verseText {
+  font-size: clamp(0.6rem, 2.4vw, 1.25rem);
+  line-height: 1.6;
+  margin: 1;
+  font-style: italic;
+  text-wrap: balance;
+}
+
+.verseRef {
+  margin-top: .5rem;
+  font-size: clamp(0.2rem, 2vw, 1rem);
+  opacity: .85;
+  margin: 2rem;
+
+}
+
+
 @media (prefers-reduced-motion: reduce) {
   .coverHero {
     transition: none;
@@ -1151,7 +1201,7 @@ section {
 .accountBox {
   flex: 1;
   max-width: max-content;
-  font-family: var(--font-serif);
+  font-family: var(--font-serif-aux);
   font-size: 0.7rem;
   line-height: 0.5;
 }
@@ -1244,4 +1294,72 @@ section {
 @keyframes popUp {
   from { transform: scale(0.8); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+
+.musicBtn {
+  position: fixed;
+  bottom: 1.4rem;
+  right: 1.4rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+  border-radius: 50%;
+  font-size: 1.5rem;
+  border: none;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgb(0 0 0 / 0.2);
+  transition: transform .2s ease;
+  z-index: 3000;
+}
+
+.musicBtn:hover {
+  transform: scale(1.1);
+}
+
+/* Texto dorado tipo foil */
+.goldText {
+  background: linear-gradient(
+    90deg,
+    #d4af37,
+    #f7e7b0,
+    #d1a83e,
+    #f8efc7,
+    #b68c2c
+  );
+  /* background-size: 300% 300%; */
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: goldShimmer 6s ease-in-out infinite;
+
+  font-family: "Mea Culpa", cursive;
+  font-size: clamp(1.2rem, 3vw, 3.1rem);
+  margin: 0.3rem 0 0.4rem;
+  line-height: 1.1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: auto;
+}
+
+.emboss {
+  color: #f4f0eb;
+  text-shadow:
+    0px 1px 1px rgba(255,255,255,0.9), /* brillo arriba */
+    0px -1px 2px rgba(0,0,0,0.25);    /* sombra abajo */
+}
+
+.glowGold {
+  color: #f8e9d9;
+  text-shadow: 
+    0 0 8px rgba(255, 230, 200, 0.4),
+    0 0 20px rgba(255, 204, 120, 0.3),
+    0 0 40px rgba(255, 204, 120, 0.25);
+}
+
+@keyframes goldShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }

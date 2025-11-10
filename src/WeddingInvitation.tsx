@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./WeddingInvitation.module.css";
-
 /* ==== Imports de imágenes desde src/photos ==== */
 import heroImg from "./photos/TomadosDeLaManoAnillo.jpg";
 import inviteImg from "./photos/SillasFoto1.jpg"; // HORIZONTAL
@@ -22,16 +21,36 @@ import tray from "./icons/tray.png";
 import papelTexture from "./photos/papel.png";
 import qrExample from "./photos/QRlol.png"; // ejemplo QR//
 
+import musicaBoda from "./audio/boda.mp4";
+
 /* =====================
    variables de entorno
 ===================== */
 
-const REPO = "Ali-Mateo/Ali-Mateo.github.io";
-const FILE_PATH = "reservas.json";
+// const REPO = "Ali-Mateo/Ali-Mateo.github.io";
+// const FILE_PATH = "reservas.json";
+/* =====================
+   RSVP via Google Forms
+===================== */
+const FORM_ID = import.meta.env.REACT_APP_GOOGLE_FORM_ID || "1FAIpQLSfHoW_-1fOtXHwSDc1L-qNrGr36uK1OfHk-Lr4Q_74ankd38Q";
+const ENTRY_NAME = import.meta.env.REACT_APP_ENTRY_NAME || "entry.1312194361"
+const ENTRY_PASES = import.meta.env.REACT_APP_ENTRY_PASES || "entry.726965031";
+const ENTRY_ESTADO = import.meta.env.REACT_APP_ENTRY_ESTADO || "entry.1991669548";
+const PUBLIC_RESPONSES_CSV = `https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3pD8HR6Mx1m_y-kafLgmQv-vATNlDNiIMnPDZVLd6YycVAeAxcwmlCtHbcowHoYAVKphQNZng1FA3/pub?output=csv`;
+async function sendRSVP(name: string, count: number, estado: "ASISTE" | "NO_ASISTE") {
+  const formData = new FormData();
+  formData.append(ENTRY_NAME, name);
+  formData.append(ENTRY_PASES, String(count));
+  formData.append(ENTRY_ESTADO, estado === "ASISTE" ? "Asistiré" : "No podré asistir");
 
-const API_KEY = 'AQ.Ab8RN6JeIrzHosbFC3eud8-X0RiQ5V7VgGhcYU2tX7m-FkEP2w';  // Usa la API Key generada en la Consola de Google
-const SPREADSHEET_ID = '1WOSQiL0rTWnXm4_iCRAoZGkcPA1uWS2KHTLObnkuFlA'; // ID de tu hoja de cálculo de Google Sheets
-const SHEET_NAME = 'Tabellenblatt1'; // Nombre de la hoja donde quieres almacenar los datos
+  await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
+    method: "POST",
+    mode: "no-cors",
+    body: formData,
+  });
+}
+
+
 
 /* =====================
    Datos de la boda
@@ -41,6 +60,33 @@ const VENUE = "La Pradera Hacienda, Tabacundo, Ecuador";
 const INVITE_DATE = "2026-03-07T12:00:00";
 
 
+function downloadICS() {
+  const ics = `
+BEGIN:VCALENDAR
+VERSION:2.0
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+DTSTART:20260307T110000
+DTEND:20260307T170000
+SUMMARY:Boda de Alison & Mateo
+LOCATION:La Pradera Hacienda, Tabacundo, Ecuador
+DESCRIPTION:¡Celebramos nuestra unión! 💍
+END:VEVENT
+END:VCALENDAR`;
+
+  const blob = new Blob([ics], { type: "text/calendar" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Boda-Alison-Mateo.ics";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+const openGoogleCalendar = () => {
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda+Alison+y+Mateo&dates=20260307T110000/20260307T170000&details=¡¡Celebramos!!&location=La+Pradera+Hacienda,+Tabacundo,+Ecuador`;
+  window.open(url, "_blank");
+};
 
 
 /* =====================
@@ -273,19 +319,25 @@ const CoverHero: React.FC<{ src: string; alt?: string }> = ({ src, alt }) => {
   }, []);
 
   return (
-    <header
-      ref={ref}
-      className={styles.coverHero}
-      role="img"
-      aria-label={alt || "Portada"}
-      style={{ backgroundImage: `url(${src})` }}
-    >
-      <div className={styles.coverOverlay}>
-        <h1 className={styles.coverTitle}>
-          {COUPLE.bride.split(" ")[0]} &amp; {COUPLE.groom.split(" ")[0]}
-        </h1>
-      </div>
-    </header>
+<header
+  ref={ref}
+  className={styles.coverHero}
+  style={{ backgroundImage: `url(${src})` }}
+>
+  <div className={styles.coverHeroContent}>
+    <h1 className={styles.coverTitle}>
+      {COUPLE.bride.split(" ")[0]} &amp; {COUPLE.groom.split(" ")[0]}
+    </h1>
+
+    <figure className={styles.verseBox}>
+      <blockquote className={styles.verseText}>
+        “Las muchas aguas no podrán apagar el amor, ni lo ahogarán los ríos”.
+      </blockquote>
+      <figcaption className={styles.verseRef}>Cantares 8:7</figcaption>
+    </figure>
+  </div>
+</header>
+
   );
 };
 
@@ -304,10 +356,32 @@ const WeddingInvitation: React.FC = () => {
   const [rsvpMsg, setRsvpMsg] = useState("");
   const [showOverlay, setShowOverlay] = useState(false);
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+const [isPlaying, setIsPlaying] = useState(false);
+
+useEffect(() => {
+  audioRef.current = new Audio(musicaBoda);
+  audioRef.current.loop = true; // repetir suave
+}, []);
+
+const toggleMusic = () => {
+  if (!audioRef.current) return;
+
+  if (isPlaying) {
+    audioRef.current.pause();
+    setIsPlaying(false);
+  } else {
+    audioRef.current.play();
+    setIsPlaying(true);
+  }
+};
+
 useEffect(() => {
   if (rsvpMsg) setShowOverlay(true);
 }, [rsvpMsg]);
 const closeOverlay = () => setShowOverlay(false);
+
+
 
   // Papel texturizado como patrón global
   useEffect(() => {
@@ -324,8 +398,49 @@ const closeOverlay = () => setShowOverlay(false);
   // const [code, setCode] = useState("");
   /* DEMO de #pases (reemplazar por API/Sheets real) */
 const [guestList, setGuestList] = useState<Guest[]>([]);
+const [showChangeConfirm, setShowChangeConfirm] = useState(false);
 
 type Guest = { grupo: string; nombre: string; pases: number };
+
+type ConfirmRecord = {
+  name: string;
+  estado: string;
+};
+
+const [confirmations, setConfirmations] = useState<ConfirmRecord[]>([]);
+     const normalizeName = (str: string) =>
+  str
+    ?.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // quita tildes
+    .trim()
+    .toUpperCase();
+
+    const respuestaPrev = useMemo(() => {
+  if (!rsvpName) return null;
+  return confirmations.find(
+    (r) => normalizeName(r.name) === normalizeName(rsvpName)
+  ) || null;
+}, [rsvpName, confirmations]);
+
+useEffect(() => {
+  fetch(PUBLIC_RESPONSES_CSV)
+    .then(res => res.text())
+    .then(csv => {
+      const rows = csv.split("\n").map(r => r.trim()).filter(Boolean);
+      const parsed = rows.slice(1).map(r => {
+        const cols = r.split(",");
+   
+
+return {
+  name: normalizeName(cols[1]),
+  estado: cols[3]?.trim()
+};
+
+      });
+      setConfirmations(parsed);
+    });
+}, []);
+
 
 useEffect(() => {
   fetch("https://raw.githubusercontent.com/Ali-Mateo/Ali-Mateo.github.io/main/invitados_normalizado.csv")
@@ -346,173 +461,175 @@ useEffect(() => {
 }, []);
 
 const grupo = useMemo(() => {
-  const nombre = rsvpName.trim().toUpperCase();
-  return guestList.find(g => g.nombre === nombre)?.grupo || null;
+  const nombre = normalizeName(rsvpName);
+  return guestList.find(g => normalizeName(g.nombre) === nombre)?.grupo || null;
 }, [rsvpName, guestList]);
+
 
 const grupoMiembros = useMemo(() => {
   return guestList.filter(g => g.grupo === grupo);
 }, [grupo, guestList]);
 
-const pasesAsignados = grupoMiembros.length; // grupo completo
+// const pasesAsignados = grupoMiembros.length; // grupo completo
 
 const guest = useMemo(() => {
-  return guestList.find(g => g.nombre === rsvpName.trim().toUpperCase()) || null;
+  return guestList.find(g => normalizeName(g.nombre) === normalizeName(rsvpName)) || null;
 }, [rsvpName, guestList]);
 
 const DEADLINE = new Date("2025-11-21T23:59:59");
 
-  const a = "g";
-  const b = "hp_5QWeLBJJkxqzJqcCvsn1tv";
-  const c = "lvvRVRJK31MEuz";
-  const tok = a+b+c
+// Estado del grupo basado en el forms
+const grupoEstado = useMemo(() => {
+  if (!grupo) return null;
 
-const handleNoAsistire = async () => {
-  if (!guest) return setRsvpMsg("⚠️ Ese nombre no está en la lista.");
-const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
-  headers: { Authorization: `token ${tok}` }
-});
+  const miembros = grupoMiembros.map(m => m.nombre);
+  const respuestasGrupo = confirmations.filter(c =>
+    miembros.includes(c.name)
+  );
 
- 
+  if (respuestasGrupo.some(r => r.estado === "Asistiré"))
+    return "confirmado";
 
-  let content: any[] = [];
-  let sha = "";
+  if (respuestasGrupo.some(r => r.estado === "No podré asistir"))
+    return "no_asiste";
 
-  if (res.ok) {
-    const json = await res.json();
-    sha = json.sha;
-    content = JSON.parse(atob(json.content));
+  return "pendiente";
+}, [grupo, grupoMiembros, confirmations]);
+
+const submitRSVP = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!guest) {
+    setRsvpMsg("⚠️ Ese nombre no está en la lista de invitados.");
+    return;
   }
 
-  const updated = content.filter(x => x.idGrupo !== grupo).concat({
-    idGrupo: grupo,
-    nombres: grupoMiembros.map(m => m.nombre),
-    pasesAsignados,
-    pasesConfirmados: 0,
-    estado: "no_asiste",
-    fecha: new Date().toISOString()
-  });
+  // 🔍 Recuperar respuesta previa (si existe)
+  const respuestaPrev = confirmations.find(
+    (r) => normalizeName(r.name) === normalizeName(rsvpName)
+  );
 
-  await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
-    method: "PUT",
-    headers: {
-      Authorization: `token ${tok}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: "RSVP NO ASISTE",
-      content: btoa(JSON.stringify(updated, null, 2)),
-      sha
-    }),
-  });
+  const yaRespondio = Boolean(respuestaPrev);
 
-  setRsvpMsg("🤍 Gracias por avisarnos. Te deseamos siempre lo mejor.");
+  // ✅ Caso: antes dijo NO y ahora intenta confirmar SÍ
+  if (yaRespondio && respuestaPrev?.estado === "No podré asistir") {
+    setRsvpMsg("🤍 Habías indicado que no asistirías. ¿Deseas cambiar tu respuesta?");
+    setShowChangeConfirm(true);
+    return;
+  }
+
+  // ✅ Caso: antes dijo SÍ y ahora intenta reenviar
+  if (yaRespondio && respuestaPrev?.estado === "Asistiré") {
+    setRsvpMsg("🤍 Ya recibimos tu confirmación. No necesitas enviarla de nuevo.");
+    setShowOverlay(true);
+    return;
+  }
+
+  if (grupoEstado === "confirmado") {
+    setRsvpMsg("🤍 Tu grupo ya confirmó asistencia.");
+    setShowOverlay(true);
+    return;
+  }
+
+  if (grupoEstado === "no_asiste") {
+    setRsvpMsg("🤍 Tu grupo ya indicó que no podrá asistir.");
+    setShowOverlay(true);
+    return;
+  }
+
+  if (new Date() > DEADLINE) {
+    setRsvpMsg("⏳ El tiempo de confirmación ha terminado.");
+    setShowOverlay(true);
+    return;
+  }
+
+  // 📝 Registrar confirmación por PRIMERA vez
+  await sendRSVP(rsvpName.trim(), rsvpCount, "ASISTE");
+
+  setConfirmations((prev) => [
+    ...prev,
+    { name: normalizeName(rsvpName), estado: "Asistiré" }
+  ]);
+
+  setRsvpMsg("💌 Gracias por confirmar. ¡Nos vemos en la boda! 🤍");
+  setShowOverlay(true);
 };
 
 
+const handleNoAsistire = async () => {
+  if (!guest) {
+    setRsvpMsg("⚠️ Ese nombre no está en la lista de invitados.");
+    setShowOverlay(true);
 
- // Manejar el envío del RSVP
-  const submitRSVP = async (e: React.FormEvent) => {
-    e.preventDefault();
+    return;
+  }
 
-    // Verificar si el invitado está en la lista (simulando búsqueda en la lista)
-    const guest = await fetchGoogleSheetData(rsvpName);
-    
-    if (!guest) {
-      setRsvpMsg("⚠️ Ese nombre no está en la lista de invitados.");
-      return;
-    }
+  const nombre = normalizeName(rsvpName);
+  const respuestaPrev = confirmations.find((r) => normalizeName(r.name) === nombre);
 
-    const data = {
-      idGrupo: guest.grupo,
-      nombres: guest.nombres,
-      pasesAsignados: guest.pasesAsignados,
-      pasesConfirmados: rsvpCount,
-      estado: "confirmado",
-      fecha: new Date().toISOString()
-    };
+  // ✅ Caso: Ya dijo que SÍ antes → Mostrar overlay para confirmación de cambio
+  if (respuestaPrev && respuestaPrev.estado === "Asistiré") {
+    setShowChangeConfirm(true);
+    return;
+  }
 
-    // Si ya está confirmado o no asiste, mostrar mensaje
-    if (guest.estado === "confirmado") {
-      setRsvpMsg(`🤍 Tu grupo ya confirmó ${guest.pasesConfirmados} pase(s).`);
-      return;
-    }
+  // ✅ Caso: Ya respondió que NO antes
+  if (respuestaPrev && respuestaPrev.estado === "No podré asistir") {
+    setRsvpMsg("🤍 Ya registraste que no puedes asistir.");
+    setShowOverlay(true);
 
-    if (guest.estado === "no_asiste") {
-      setRsvpMsg("🤍 Tu grupo indicó que no podrá asistir.");
-      return;
-    }
+    return;
+  }
 
-    // Fecha límite pasada
-    if (new Date() > DEADLINE) {
-      setRsvpMsg("⏳ El tiempo de confirmación ha caducado. Gracias por tu consideración 🤍");
-      return;
-    }
+  if (new Date() > DEADLINE) {
+    setRsvpMsg("⏳ El tiempo de confirmación terminó.");
+    setShowOverlay(true);
 
-    // Si todo está bien, registrar la confirmación
-    try {
-      await updateGoogleSheetData(data);
-      setRsvpMsg("💌 Gracias, tu confirmación fue registrada.");
-    } catch (error) {
-      setRsvpMsg("⚠️ Hubo un error al procesar tu confirmación.");
-    }
-  };
+    return;
+  }
 
-  // Obtener datos desde Google Sheets
-  const fetchGoogleSheetData = async (name: string) => {
-    const response = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`
-    );
-    const data = await response.json();
-    if (!data.values) return null;
+  // ✅ Enviar NO por primera vez
+  await sendRSVP(nombre, 0, "NO_ASISTE");
+  setConfirmations((prev) => [...prev, { name: nombre, estado: "No podré asistir" }]);
+  setRsvpMsg("🤍 Gracias por avisarnos ✨");
+  setShowOverlay(true);
 
-    // Buscar el invitado por su nombre
-    const guestRow = data.values.find((row: any) => row[1].toUpperCase() === name.toUpperCase());
-    if (!guestRow) return null;
+};
 
-    return {
-      grupo: guestRow[0],
-      nombres: guestRow[1],
-      pasesAsignados: guestRow[2],
-      pasesConfirmados: guestRow[3],
-      estado: guestRow[4],
-      fecha: guestRow[5]
-    };
-  };
+const confirmarCambioASiAsistir = async () => {
+  const nombre = normalizeName(rsvpName);
 
-  // Actualizar los datos de la hoja de Google Sheets
-  const updateGoogleSheetData = async (newData: any) => {
-    // Primero obtenemos los datos existentes
-    const response = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`
-    );
-    const data = await response.json();
-    if (!data.values) throw new Error("No se pudo obtener la hoja de datos.");
+  await sendRSVP(nombre, rsvpCount, "ASISTE");
 
-    const updatedData = data.values.filter((row: any) => row[0] !== newData.idGrupo);
-    updatedData.push([
-      newData.idGrupo,
-      newData.nombres,
-      newData.pasesAsignados,
-      newData.pasesConfirmados,
-      newData.estado,
-      newData.fecha
-    ]);
+  // actualizamos memoria
+  setConfirmations((prev) =>
+    prev.map(r =>
+      normalizeName(r.name) === nombre ? { name: nombre, estado: "Asistiré" } : r
+    )
+  );
 
-    const updateResponse = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A2:F?valueInputOption=RAW&key=${API_KEY}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          range: `${SHEET_NAME}!A2:F`,
-          values: updatedData
-        })
-      }
-    );
+  setShowChangeConfirm(false);
+  setRsvpMsg("💌 Hemos actualizado tu confirmación. ¡Te esperamos con alegría! 🤍");
+  setShowOverlay(true);
+};
 
-    if (!updateResponse.ok) throw new Error("Error al actualizar los datos en Google Sheets.");
-  };
+const confirmarCambioANoAsistir = async () => {
+  const nombre = normalizeName(rsvpName);
+
+  await sendRSVP(nombre, 0, "NO_ASISTE");
+
+  // Actualiza memoria
+  setConfirmations((prev) =>
+    prev.map(r =>
+      normalizeName(r.name) === nombre ? { name: nombre, estado: "No podré asistir" } : r
+    )
+  );
+
+  setShowChangeConfirm(false);
+  setRsvpMsg("🤍 Hemos actualizado tu confirmación. Gracias por avisarnos.");
+  setShowOverlay(true);
+
+};
 
 
   // Cuenta bancaria (demo)
@@ -529,10 +646,16 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
   const showInvite = useScrollTrigger(inviteRef, 0.3);
 
   return (
+    
     <div
       className={styles.pageTile}
       style={{ backgroundImage: `url(${papelTexture})` }}
+      
     >
+      <button className={styles.musicBtn} onClick={toggleMusic}>
+  {isPlaying ? "⏸" : "🎶"}
+</button>
+
       <CoverHero src={mostrandoAnillo} alt="Portada: manos y anillo" />
 
       <div className={styles.invRoot} ref={ref as any}>
@@ -578,12 +701,12 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
               <p className={styles.inviteIntro}>
                 Nos complace invitarte a celebrar nuestra unión
               </p>
-              <h2 className={styles.inviteNames}>
+              <h2 className={styles.goldText}>
                 Alison Torres <span>&</span>  Mateo Ordóñez
               </h2>
               <p className={styles.inviteDetails}>
                 Sábado, 7 de Marzo de 2026 <br />
-                <strong>La Pradera Hacienda</strong> <br />a las 12:00 p.m.
+                <strong>La Pradera Hacienda</strong> <br />a las 11:00 a.m.
               </p>
             </div>
 
@@ -611,6 +734,17 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
             </div>
           </div>
         </section>
+
+ <div className={styles.calendarRow}>
+  <button className={`${styles.btn} ${styles.ghost}`} onClick={downloadICS}>
+    Apple / Outlook Calendar
+  </button>
+
+  <button className={`${styles.btn} ${styles.ghost}`} onClick={openGoogleCalendar}>
+    Google Calendar
+  </button>
+</div>
+
 
         {/* CONTADOR */}
         <section className={styles.countStrip}>
@@ -663,7 +797,7 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
               {
                 src: heroImg,
                 alt: "Tomados de la mano",
-                caption: "Nos convertimos en 1.",
+                caption: "Nos convertimos en uno.",
               },
               {
                 src: arrodillado,
@@ -699,7 +833,7 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
     <strong>Vicente Ordóñez</strong> & <strong>Laura Córdova</strong>
   </li>
   <li>
-    <strong>Maria Aguirre</strong> & <strong>Jose Torres</strong>
+    <strong>Fredy Torres</strong> & <strong>María Aguirre</strong>
   </li>
 </ul>
 
@@ -724,7 +858,7 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
                 alt="Recepción"
                 className={styles.itineraryIconImg}
               />
-              <span className={styles.itineraryTime}>12:00</span>
+              <span className={styles.itineraryTime}>11:00</span>
               <p className={styles.itineraryText}>Recepción & Bienvenida</p>
             </div>
 
@@ -734,17 +868,17 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
                 alt="Ceremonia"
                 className={styles.itineraryIconImg}
               />
-              <span className={styles.itineraryTime}>12:30</span>
+              <span className={styles.itineraryTime}>11:30</span>
               <p className={styles.itineraryText}>Ceremonia</p>
             </div>
 
             <div className={styles.itineraryItem}>
               <img
                 src={wine}
-                alt="Brindis y Fotos"
+                alt="Coctel y Fotos"
                 className={styles.itineraryIconImg}
               />
-              <span className={styles.itineraryTime}>13:30</span>
+              <span className={styles.itineraryTime}>13:00</span>
               <p className={styles.itineraryText}>Brindis & Fotos</p>
             </div>
 
@@ -755,7 +889,7 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
                 className={styles.itineraryIconImg}
               />
               <span className={styles.itineraryTime}>14:00</span>
-              <p className={styles.itineraryText}>Banquete & Celebración</p>
+              <p className={styles.itineraryText}>Banquete</p>
             </div>
           </div>
 
@@ -863,6 +997,7 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
             <button className={`${styles.btn} ${styles.rg}`} type="submit">
               Enviar aceptación
             </button>
+
             <button
   type="button"
   className={`${styles.btn} ${styles.ghost}`}
@@ -870,6 +1005,40 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
 >
   No podré asistir
 </button>
+{showChangeConfirm && (
+  <div className={styles.overlayBackdrop} onClick={() => setShowChangeConfirm(false)}>
+    <div className={styles.overlayBox} onClick={(e) => e.stopPropagation()}>
+      
+      {respuestaPrev?.estado === "Asistiré" ? (
+        <>
+          <p>
+            Ya habías confirmado que <strong>SÍ asistirás 🤍</strong><br />
+            ¿Deseas cambiar tu respuesta a <strong>NO asistiré</strong>?
+          </p>
+          <button className={styles.btn} onClick={confirmarCambioANoAsistir}>
+            Sí, cambiar a NO
+          </button>
+        </>
+      ) : (
+        <>
+          <p>
+            Habías indicado que <strong>NO asistirías 🤍</strong><br />
+            ¿Deseas cambiar tu respuesta a <strong>SÍ asistiré</strong>?
+          </p>
+          <button className={styles.btn} onClick={confirmarCambioASiAsistir}>
+            Sí, cambiar a SÍ
+          </button>
+        </>
+      )}
+
+      <button className={styles.btn} onClick={() => setShowChangeConfirm(false)}>
+        Cancelar
+      </button>
+    </div>
+  </div>
+)}
+
+
 
             {showOverlay && (
   <div className={styles.overlayBackdrop} onClick={closeOverlay}>
@@ -894,9 +1063,8 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
         >
           <h2 className={styles.sectionTitle}>Detalles de regalo</h2>
           <p className={styles.muted}>
-            “Tu compañía es lo más importante, pero si gustas apoyarnos en
-            nuestro nuevo comienzo, aquí están los detalles para tu
-            contribución”.
+            “Compartir este momento con quienes queremos es valioso para nosotros. 
+            Agradecemos que tu detalle sea través de transferencia bancaria”.
           </p>
 
           <div className={styles.accountRow}>
@@ -911,11 +1079,11 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
               </p>
               <p>
                 {/* <strong>Número de cuenta:</strong>  */}
-                2209176525
+                # 2209176525
               </p>
               <p>
                 {/* <strong>Cédula:</strong> */}
-                1111111111
+                CI 1725393407
               </p>
               <p>
                 {/* <strong>Correo:</strong>  */}
