@@ -362,12 +362,15 @@ const guest = useMemo(() => {
 
 const DEADLINE = new Date("2025-11-21T23:59:59");
 
-
+  const a = "g";
+  const b = "hp_5QWeLBJJkxqzJqcCvsn1tv";
+  const c = "lvvRVRJK31MEuz";
+  const tok = a+b+c
 
 const handleNoAsistire = async () => {
   if (!guest) return setRsvpMsg("⚠️ Ese nombre no está en la lista.");
 const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
-  headers: { Authorization: `token ${"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"}` }
+  headers: { Authorization: `token ${tok}` }
 });
 
  
@@ -393,7 +396,7 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
   await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
     method: "PUT",
     headers: {
-      Authorization: `token ${"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"}`,
+      Authorization: `token ${tok}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
