@@ -26,7 +26,6 @@ import qrExample from "./photos/QRlol.png"; // ejemplo QR//
    variables de entorno
 ===================== */
 
-const GITHUB_TOKEN = "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";
 const REPO = "Ali-Mateo/Ali-Mateo.github.io";
 const FILE_PATH = "reservas.json";
 
@@ -367,9 +366,8 @@ const DEADLINE = new Date("2025-11-21T23:59:59");
 
 const handleNoAsistire = async () => {
   if (!guest) return setRsvpMsg("⚠️ Ese nombre no está en la lista.");
-console.log('Token de GitHub:', GITHUB_TOKEN); // Para verificar que el token se carga correctamente
 const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
-  headers: { Authorization: `token ${GITHUB_TOKEN}` }
+  headers: { Authorization: `token ${"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"}` }
 });
 
  
@@ -395,7 +393,7 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
   await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
     method: "PUT",
     headers: {
-      Authorization: `token ${GITHUB_TOKEN}`,
+      Authorization: `token ${"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"}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
