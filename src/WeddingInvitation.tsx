@@ -291,7 +291,7 @@ const ScrollImage: React.FC<ScrollImageProps> = ({ src, alt }) => {
 };
 
 /* ---- CoverHero: portada que se oculta al hacer scroll ---- */
-const CoverHero: React.FC<{ src: string; alt?: string }> = ({ src, alt }) => {
+const CoverHero: React.FC<{ src: string; alt?: string }> = ({ src }) => {
   const ref = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
