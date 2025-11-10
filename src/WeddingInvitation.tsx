@@ -26,9 +26,13 @@ import qrExample from "./photos/QRlol.png"; // ejemplo QR//
    variables de entorno
 ===================== */
 
-const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
+const GITHUB_TOKEN = "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";
 const REPO = "Ali-Mateo/Ali-Mateo.github.io";
 const FILE_PATH = "reservas.json";
+
+const API_KEY = 'AQ.Ab8RN6JeIrzHosbFC3eud8-X0RiQ5V7VgGhcYU2tX7m-FkEP2w';  // Usa la API Key generada en la Consola de Google
+const SPREADSHEET_ID = '1WOSQiL0rTWnXm4_iCRAoZGkcPA1uWS2KHTLObnkuFlA'; // ID de tu hoja de cálculo de Google Sheets
+const SHEET_NAME = 'Tabellenblatt1'; // Nombre de la hoja donde quieres almacenar los datos
 
 /* =====================
    Datos de la boda
@@ -404,102 +408,110 @@ const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PA
   setRsvpMsg("🤍 Gracias por avisarnos. Te deseamos siempre lo mejor.");
 };
 
-const submitRSVP = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!guest) {
-    setRsvpMsg("⚠️ Ese nombre no está en la lista de invitados.");
-    return;
-  }
 
-  // Descargar archivo actual
-  const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
-    headers: { Authorization: `token ${GITHUB_TOKEN}` }
-  });
 
-  let content: any[] = [];
-  let sha = "";
+ // Manejar el envío del RSVP
+  const submitRSVP = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  if (res.ok) {
-    const json = await res.json();
-    sha = json.sha;
-    content = JSON.parse(atob(json.content));
-  }
+    // Verificar si el invitado está en la lista (simulando búsqueda en la lista)
+    const guest = await fetchGoogleSheetData(rsvpName);
+    
+    if (!guest) {
+      setRsvpMsg("⚠️ Ese nombre no está en la lista de invitados.");
+      return;
+    }
 
-  const existingGroup = content.find(x => x.idGrupo === grupo);
+    const data = {
+      idGrupo: guest.grupo,
+      nombres: guest.nombres,
+      pasesAsignados: guest.pasesAsignados,
+      pasesConfirmados: rsvpCount,
+      estado: "confirmado",
+      fecha: new Date().toISOString()
+    };
 
-  // Chequear si ya tiene estado final
-  if (existingGroup?.estado === "confirmado") {
-    setRsvpMsg(`🤍 Tu grupo ya confirmó ${existingGroup.pasesConfirmados} pase(s).`);
-    return;
-  }
+    // Si ya está confirmado o no asiste, mostrar mensaje
+    if (guest.estado === "confirmado") {
+      setRsvpMsg(`🤍 Tu grupo ya confirmó ${guest.pasesConfirmados} pase(s).`);
+      return;
+    }
 
-  if (existingGroup?.estado === "no_asiste") {
-    setRsvpMsg("🤍 Tu grupo indicó que no podrá asistir.");
-    return;
-  }
+    if (guest.estado === "no_asiste") {
+      setRsvpMsg("🤍 Tu grupo indicó que no podrá asistir.");
+      return;
+    }
 
-  // Fecha límite pasada
-  if (new Date() > DEADLINE) {
-  const newEntry = {
-    idGrupo: grupo,
-    nombres: grupoMiembros.map(m => m.nombre),
-    pasesAsignados,
-    pasesConfirmados: existingGroup?.pasesConfirmados ?? 0,
-    estado: "caducado",
-    fecha: new Date().toISOString()
+    // Fecha límite pasada
+    if (new Date() > DEADLINE) {
+      setRsvpMsg("⏳ El tiempo de confirmación ha caducado. Gracias por tu consideración 🤍");
+      return;
+    }
+
+    // Si todo está bien, registrar la confirmación
+    try {
+      await updateGoogleSheetData(data);
+      setRsvpMsg("💌 Gracias, tu confirmación fue registrada.");
+    } catch (error) {
+      setRsvpMsg("⚠️ Hubo un error al procesar tu confirmación.");
+    }
   };
 
-  const updated = content.filter(x => x.idGrupo !== grupo).concat(newEntry);
+  // Obtener datos desde Google Sheets
+  const fetchGoogleSheetData = async (name: string) => {
+    const response = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`
+    );
+    const data = await response.json();
+    if (!data.values) return null;
 
-  await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
-    method: "PUT",
-    headers: {
-      Authorization: `token ${GITHUB_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: "RSVP caducado",
-      content: btoa(JSON.stringify(updated, null, 2)),
-      sha
-    }),
-  });
+    // Buscar el invitado por su nombre
+    const guestRow = data.values.find((row: any) => row[1].toUpperCase() === name.toUpperCase());
+    if (!guestRow) return null;
 
-  setRsvpMsg("⏳ El tiempo de confirmación ha caducado. Gracias por tu consideración 🤍");
-  return;
-}
-
-
-  // Registrar confirmación normal
-  const newEntry = {
-    idGrupo: grupo,
-    nombres: grupoMiembros.map(m => m.nombre),
-    pasesAsignados,
-    pasesConfirmados: rsvpCount,
-    estado: "confirmado",
-    fecha: new Date().toISOString()
+    return {
+      grupo: guestRow[0],
+      nombres: guestRow[1],
+      pasesAsignados: guestRow[2],
+      pasesConfirmados: guestRow[3],
+      estado: guestRow[4],
+      fecha: guestRow[5]
+    };
   };
 
-  const updated = content.filter(x => x.idGrupo !== grupo).concat(newEntry);
+  // Actualizar los datos de la hoja de Google Sheets
+  const updateGoogleSheetData = async (newData: any) => {
+    // Primero obtenemos los datos existentes
+    const response = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`
+    );
+    const data = await response.json();
+    if (!data.values) throw new Error("No se pudo obtener la hoja de datos.");
 
-  await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
-    method: "PUT",
-    headers: {
-      Authorization: `token ${GITHUB_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: "RSVP update",
-      content: btoa(JSON.stringify(updated, null, 2)),
-      sha
-    }),
-  });
+    const updatedData = data.values.filter((row: any) => row[0] !== newData.idGrupo);
+    updatedData.push([
+      newData.idGrupo,
+      newData.nombres,
+      newData.pasesAsignados,
+      newData.pasesConfirmados,
+      newData.estado,
+      newData.fecha
+    ]);
 
-  setRsvpMsg("💌 Gracias, tu confirmación fue registrada.");
-};
+    const updateResponse = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A2:F?valueInputOption=RAW&key=${API_KEY}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          range: `${SHEET_NAME}!A2:F`,
+          values: updatedData
+        })
+      }
+    );
 
-
-
-
+    if (!updateResponse.ok) throw new Error("Error al actualizar los datos en Google Sheets.");
+  };
 
 
   // Cuenta bancaria (demo)
@@ -569,7 +581,7 @@ const submitRSVP = async (e: React.FormEvent) => {
                 Alison Torres <span>&</span>  Mateo Ordóñez
               </h2>
               <p className={styles.inviteDetails}>
-                Sábado, 7 de febrero de 2026 <br />
+                Sábado, 7 de Marzo de 2026 <br />
                 <strong>La Pradera Hacienda</strong> <br />a las 12:00 p.m.
               </p>
             </div>
@@ -622,7 +634,7 @@ const submitRSVP = async (e: React.FormEvent) => {
             </div>
           </div>
           <div className={styles.fecha}>
-            Sábado <strong>7 de febrero de 2026</strong>
+            Sábado <strong>7 de Marzo de 2026</strong>
           </div>
         </section>
 
