@@ -32,21 +32,24 @@ import musicaBoda from "./audio/boda.mp4";
 /* =====================
    RSVP via Google Forms
 ===================== */
-const FORM_ID = import.meta.env.REACT_APP_GOOGLE_FORM_ID || "1FAIpQLSfHoW_-1fOtXHwSDc1L-qNrGr36uK1OfHk-Lr4Q_74ankd38Q";
-const ENTRY_NAME = import.meta.env.REACT_APP_ENTRY_NAME || "entry.1312194361"
-const ENTRY_PASES = import.meta.env.REACT_APP_ENTRY_PASES || "entry.726965031";
-const ENTRY_ESTADO = import.meta.env.REACT_APP_ENTRY_ESTADO || "entry.1991669548";
+// const FORM_ID = import.meta.env.REACT_APP_GOOGLE_FORM_ID || "1FAIpQLSfHoW_-1fOtXHwSDc1L-qNrGr36uK1OfHk-Lr4Q_74ankd38Q";
+// const ENTRY_NAME = import.meta.env.REACT_APP_ENTRY_NAME || "entry.1312194361"
+// const ENTRY_PASES = import.meta.env.REACT_APP_ENTRY_PASES || "entry.726965031";
+// const ENTRY_ESTADO = import.meta.env.REACT_APP_ENTRY_ESTADO || "entry.1991669548";
 const PUBLIC_RESPONSES_CSV = `https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3pD8HR6Mx1m_y-kafLgmQv-vATNlDNiIMnPDZVLd6YycVAeAxcwmlCtHbcowHoYAVKphQNZng1FA3/pub?output=csv`;
-async function sendRSVP(name: string, count: number, estado: "ASISTE" | "NO_ASISTE") {
-  const formData = new FormData();
-  formData.append(ENTRY_NAME, name);
-  formData.append(ENTRY_PASES, String(count));
-  formData.append(ENTRY_ESTADO, estado === "ASISTE" ? "Asistiré" : "No podré asistir");
+export async function sendRSVP(nombre: string, cantidad: number, estado: string) {
+  const FORM_ID = "1FAIpQLSfHoW_-1fOtXHwSDc1L-qNrGr36uK1OfHk-Lr4Q_74ankd38Q";
+  const ACTION_URL = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`;
 
-  await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
+  const formData = new FormData();
+  formData.append("entry.1312194361", nombre);
+  formData.append("entry.726965031", String(cantidad));
+  formData.append("entry.1991669548", estado);
+
+  await fetch(ACTION_URL, {
     method: "POST",
     mode: "no-cors",
-    body: formData,
+    body: formData
   });
 }
 
@@ -87,6 +90,7 @@ const openGoogleCalendar = () => {
   const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Boda+Alison+y+Mateo&dates=20260307T110000/20260307T170000&details=¡¡Celebramos!!&location=La+Pradera+Hacienda,+Tabacundo,+Ecuador`;
   window.open(url, "_blank");
 };
+
 
 
 /* =====================
@@ -355,9 +359,52 @@ const WeddingInvitation: React.FC = () => {
   const [rsvpCount, setRsvpCount] = useState(1);
   const [rsvpMsg, setRsvpMsg] = useState("");
   const [showOverlay, setShowOverlay] = useState(false);
+const [confirmations, setConfirmations] = useState<ConfirmRecord[]>([]);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 const [isPlaying, setIsPlaying] = useState(false);
+
+  // #pases (tipado para evitar "possibly null")
+  // const [code, setCode] = useState("");
+  /* DEMO de #pases (reemplazar por API/Sheets real) */
+const [guestList, setGuestList] = useState<Guest[]>([]);
+const [showChangeConfirm, setShowChangeConfirm] = useState(false);
+
+type Guest = { grupo: string; nombre: string; pases: number };
+
+type ConfirmRecord = {
+  name: string;
+  estado: string;
+};
+
+
+     const normalizeName = (str: string) =>
+  str
+    ?.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // quita tildes
+    .trim()
+    .toUpperCase();
+
+ async function fetchGoogleSheetDataAll() {
+  const res = await fetch(PUBLIC_RESPONSES_CSV);
+  const text = await res.text();
+  const rows = text.split("\n").map((r) => r.trim()).filter(Boolean);
+
+  const list = rows.slice(1).map((r) => {
+    const cols = r.split(",");
+    return {
+      name: cols[1]?.trim()?.toUpperCase(),
+      pases: parseInt(cols[2] || "1", 10),
+      estado: cols[3]?.trim()
+    };
+  });
+
+  return list;
+}
+
+useEffect(() => {
+  fetchGoogleSheetDataAll().then(setConfirmations);
+}, []);
 
 useEffect(() => {
   audioRef.current = new Audio(musicaBoda);
@@ -394,26 +441,7 @@ const closeOverlay = () => setShowOverlay(false);
     };
   }, []);
 
-  // #pases (tipado para evitar "possibly null")
-  // const [code, setCode] = useState("");
-  /* DEMO de #pases (reemplazar por API/Sheets real) */
-const [guestList, setGuestList] = useState<Guest[]>([]);
-const [showChangeConfirm, setShowChangeConfirm] = useState(false);
 
-type Guest = { grupo: string; nombre: string; pases: number };
-
-type ConfirmRecord = {
-  name: string;
-  estado: string;
-};
-
-const [confirmations, setConfirmations] = useState<ConfirmRecord[]>([]);
-     const normalizeName = (str: string) =>
-  str
-    ?.normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // quita tildes
-    .trim()
-    .toUpperCase();
 
     const respuestaPrev = useMemo(() => {
   if (!rsvpName) return null;
@@ -422,24 +450,6 @@ const [confirmations, setConfirmations] = useState<ConfirmRecord[]>([]);
   ) || null;
 }, [rsvpName, confirmations]);
 
-useEffect(() => {
-  fetch(PUBLIC_RESPONSES_CSV)
-    .then(res => res.text())
-    .then(csv => {
-      const rows = csv.split("\n").map(r => r.trim()).filter(Boolean);
-      const parsed = rows.slice(1).map(r => {
-        const cols = r.split(",");
-   
-
-return {
-  name: normalizeName(cols[1]),
-  estado: cols[3]?.trim()
-};
-
-      });
-      setConfirmations(parsed);
-    });
-}, []);
 
 
 useEffect(() => {
@@ -451,8 +461,8 @@ useEffect(() => {
         const [idGrupo, nombre, contacto, parentesco, pases] = r.split(",");
         // console.log({ idGrupo, nombre, contacto, parentesco, pases });
         return {
-          grupo: contacto.trim() || idGrupo || parentesco, // numero = ID del grupo
-          nombre: nombre.normalize("NFC").toUpperCase(),
+          grupo: normalizeName(contacto || idGrupo || parentesco),
+          nombre: normalizeName(nombre),
           pases: Number(pases) || 1
         };
       });
@@ -490,7 +500,7 @@ const grupoEstado = useMemo(() => {
   if (respuestasGrupo.some(r => r.estado === "Asistiré"))
     return "confirmado";
 
-  if (respuestasGrupo.some(r => r.estado === "No podré asistir"))
+  if (respuestasGrupo.some(r => r.estado === "No podré Asistir"))
     return "no_asiste";
 
   return "pendiente";
@@ -499,60 +509,73 @@ const grupoEstado = useMemo(() => {
 const submitRSVP = async (e: React.FormEvent) => {
   e.preventDefault();
 
+  // Siempre reset visual antes de procesar
+  setShowOverlay(false);
+
   if (!guest) {
-    setRsvpMsg("⚠️ Ese nombre no está en la lista de invitados.");
+    setTimeout(() => {
+      setRsvpMsg("⚠️ Ese nombre no está en la lista de invitados.");
+      setShowOverlay(true);
+    }, 10);
     return;
   }
 
-  // 🔍 Recuperar respuesta previa (si existe)
   const respuestaPrev = confirmations.find(
     (r) => normalizeName(r.name) === normalizeName(rsvpName)
   );
-
   const yaRespondio = Boolean(respuestaPrev);
 
-  // ✅ Caso: antes dijo NO y ahora intenta confirmar SÍ
-  if (yaRespondio && respuestaPrev?.estado === "No podré asistir") {
-    setRsvpMsg("🤍 Habías indicado que no asistirías. ¿Deseas cambiar tu respuesta?");
-    setShowChangeConfirm(true);
+  // ❗ Antes dijo NO → ofrecer cambio a SÍ
+  if (yaRespondio && respuestaPrev?.estado === "No podré Asistir") {
+    setTimeout(() => {
+      setRsvpMsg("🤍 Habías indicado que no asistirías. ¿Deseas cambiar tu respuesta?");
+      setShowChangeConfirm(true);
+    }, 10);
     return;
   }
 
-  // ✅ Caso: antes dijo SÍ y ahora intenta reenviar
+  // ❗ Antes dijo SÍ → overlay permanente
   if (yaRespondio && respuestaPrev?.estado === "Asistiré") {
-    setRsvpMsg("🤍 Ya recibimos tu confirmación. No necesitas enviarla de nuevo.");
-    setShowOverlay(true);
+    setTimeout(() => {
+      setRsvpMsg("🤍 Ya recibimos tu confirmación. No necesitas enviarla de nuevo.");
+      setShowOverlay(true);
+    }, 10);
     return;
   }
 
   if (grupoEstado === "confirmado") {
-    setRsvpMsg("🤍 Tu grupo ya confirmó asistencia.");
-    setShowOverlay(true);
+    setTimeout(() => {
+      setRsvpMsg("🤍 Tu grupo ya confirmó asistencia.");
+      setShowOverlay(true);
+    }, 10);
     return;
   }
 
   if (grupoEstado === "no_asiste") {
-    setRsvpMsg("🤍 Tu grupo ya indicó que no podrá asistir.");
-    setShowOverlay(true);
+    setTimeout(() => {
+      setRsvpMsg("🤍 Tu grupo ya indicó que no podrá asistir.");
+      setShowOverlay(true);
+    }, 10);
     return;
   }
 
   if (new Date() > DEADLINE) {
-    setRsvpMsg("⏳ El tiempo de confirmación ha terminado.");
-    setShowOverlay(true);
+    setTimeout(() => {
+      setRsvpMsg("⏳ El tiempo de confirmación ha terminado.");
+      setShowOverlay(true);
+    }, 10);
     return;
   }
-
-  // 📝 Registrar confirmación por PRIMERA vez
-  await sendRSVP(rsvpName.trim(), rsvpCount, "ASISTE");
 
   setConfirmations((prev) => [
     ...prev,
     { name: normalizeName(rsvpName), estado: "Asistiré" }
   ]);
 
-  setRsvpMsg("💌 Gracias por confirmar. ¡Nos vemos en la boda! 🤍");
-  setShowOverlay(true);
+  setTimeout(() => {
+    setRsvpMsg("💌 Gracias por confirmar. ¡Nos vemos en la boda! 🤍");
+    setShowOverlay(true);
+  }, 10);
 };
 
 
@@ -560,76 +583,65 @@ const handleNoAsistire = async () => {
   if (!guest) {
     setRsvpMsg("⚠️ Ese nombre no está en la lista de invitados.");
     setShowOverlay(true);
-
     return;
   }
 
   const nombre = normalizeName(rsvpName);
-  const respuestaPrev = confirmations.find((r) => normalizeName(r.name) === nombre);
+  const previa = confirmations.find(r => r.name === nombre);
 
-  // ✅ Caso: Ya dijo que SÍ antes → Mostrar overlay para confirmación de cambio
-  if (respuestaPrev && respuestaPrev.estado === "Asistiré") {
+  // Si ya dijo NO → solo mostrar mensaje
+  if (previa?.estado === "No podré Asistir") {
+    setRsvpMsg("🤍 Ya registraste que no puedes asistir.");
+    setShowOverlay(true);
+    return;
+  }
+
+  // Si antes dijo SÍ → mostrar modal de cambio
+  if (previa?.estado === "Asistiré") {
     setShowChangeConfirm(true);
     return;
   }
 
-  // ✅ Caso: Ya respondió que NO antes
-  if (respuestaPrev && respuestaPrev.estado === "No podré asistir") {
-    setRsvpMsg("🤍 Ya registraste que no puedes asistir.");
-    setShowOverlay(true);
+  // Registrar por primera vez
+  await sendRSVP(nombre, 0, "No podré Asistir");
 
-    return;
-  }
+  setConfirmations(prev =>
+    prev.concat({ name: nombre, estado: "No podré Asistir" })
+  );
 
-  if (new Date() > DEADLINE) {
-    setRsvpMsg("⏳ El tiempo de confirmación terminó.");
-    setShowOverlay(true);
-
-    return;
-  }
-
-  // ✅ Enviar NO por primera vez
-  await sendRSVP(nombre, 0, "NO_ASISTE");
-  setConfirmations((prev) => [...prev, { name: nombre, estado: "No podré asistir" }]);
   setRsvpMsg("🤍 Gracias por avisarnos ✨");
   setShowOverlay(true);
-
 };
 
 const confirmarCambioASiAsistir = async () => {
   const nombre = normalizeName(rsvpName);
 
-  await sendRSVP(nombre, rsvpCount, "ASISTE");
+  await sendRSVP(nombre, rsvpCount, "Asistiré");
 
-  // actualizamos memoria
-  setConfirmations((prev) =>
-    prev.map(r =>
-      normalizeName(r.name) === nombre ? { name: nombre, estado: "Asistiré" } : r
-    )
+  setConfirmations(prev =>
+    prev.map(r => r.name === nombre ? { name: nombre, estado: "Asistiré" } : r)
   );
 
   setShowChangeConfirm(false);
-  setRsvpMsg("💌 Hemos actualizado tu confirmación. ¡Te esperamos con alegría! 🤍");
+  setRsvpMsg("💌 Hemos actualizado tu confirmación. ¡Te esperamos! 🤍");
   setShowOverlay(true);
 };
+
 
 const confirmarCambioANoAsistir = async () => {
   const nombre = normalizeName(rsvpName);
 
-  await sendRSVP(nombre, 0, "NO_ASISTE");
+  await sendRSVP(nombre, 0, "No podré Asistir");
 
-  // Actualiza memoria
-  setConfirmations((prev) =>
-    prev.map(r =>
-      normalizeName(r.name) === nombre ? { name: nombre, estado: "No podré asistir" } : r
-    )
+  setConfirmations(prev =>
+    prev.map(r => r.name === nombre ? { name: nombre, estado: "No podré Asistir" } : r)
   );
 
   setShowChangeConfirm(false);
-  setRsvpMsg("🤍 Hemos actualizado tu confirmación. Gracias por avisarnos.");
+  setRsvpMsg("🤍 Hemos actualizado tu respuesta. Gracias por avisarnos.");
   setShowOverlay(true);
-
 };
+
 
 
   // Cuenta bancaria (demo)
@@ -1003,7 +1015,7 @@ const confirmarCambioANoAsistir = async () => {
   className={`${styles.btn} ${styles.ghost}`}
   onClick={handleNoAsistire}
 >
-  No podré asistir
+  No podré Asistir
 </button>
 {showChangeConfirm && (
   <div className={styles.overlayBackdrop} onClick={() => setShowChangeConfirm(false)}>
