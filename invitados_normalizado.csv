@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+ï»¿group_id,nombre,telefono,parentesco,max_pases
+=======
 group_id,nombre,telefono,parentesco,max_pases
+>>>>>>> parent of 37e24e6 (Update invitados_normalizado.csv)
 986426751,María Aguirre,986426751,Familia Novia,1
 962798441,Fredy Torres,962798441,,1
 988557996,Steven Torres,988557996,,1
