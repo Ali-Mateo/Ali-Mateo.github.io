@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-ï»¿group_id,nombre,telefono,parentesco,max_pases
-=======
 group_id,nombre,telefono,parentesco,max_pases
->>>>>>> parent of 37e24e6 (Update invitados_normalizado.csv)
 986426751,María Aguirre,986426751,Familia Novia,1
 962798441,Fredy Torres,962798441,,1
 988557996,Steven Torres,988557996,,1
@@ -139,7 +135,7 @@ group_id,nombre,telefono,parentesco,max_pases
 992732859,Esthefany Ureta,992732859,,1
 998136569,Estefania Arico,998136569,,2
 998136569,David Alban,998136569,,2
-987041845,Stefania Rivera,987041845,,2
+987041845,Stefany Rivera,987041845,,2
 987041845,Leonardo,987041845,,2
 958857700,Mathew Cisneros,958857700,,1
 984677570,Pamela Vargas,984677570,,1
